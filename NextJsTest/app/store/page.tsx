@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useEffect, useState } from "react"
 import { getStoreInfo, updateStoreInfo, type StoreInfo } from "@/lib/api-client"
+import { getAuthInfo } from "@/lib/auth-utils"
 import { Loader2 } from "lucide-react"
 import { Sidebar } from "@/components/sidebar"
 
@@ -26,14 +27,16 @@ export default function StoreManagementPage() {
     closedM: 0,
   })
 
-  // TODO: Replace with actual store ID from auth context
-  const storeId = 1
+  const storeId = getAuthInfo()?.storeId
 
   useEffect(() => {
-    loadStoreInfo()
-  }, [])
+    if (storeId) {
+      loadStoreInfo()
+    }
+  }, [storeId])
 
   async function loadStoreInfo() {
+    if (!storeId) return
     try {
       setLoading(true)
       const data = await getStoreInfo(storeId)
@@ -57,6 +60,7 @@ export default function StoreManagementPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!storeId) return
     try {
       setSaving(true)
       await updateStoreInfo(storeId, formData)
@@ -70,7 +74,7 @@ export default function StoreManagementPage() {
     }
   }
 
-  if (loading) {
+  if (!storeId || loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
