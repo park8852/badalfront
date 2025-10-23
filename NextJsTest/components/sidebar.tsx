@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Store, UtensilsCrossed, LogOut, PlusSquare } from "lucide-react"
+import { Home, Store, UtensilsCrossed, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { clearAuthInfo } from "@/lib/auth-utils"
 
@@ -11,7 +11,6 @@ const navigation = [
   { name: "주문 관리", href: "/dashboard", icon: Home },
   { name: "가게 관리", href: "/store", icon: Store },
   { name: "메뉴 관리", href: "/menu", icon: UtensilsCrossed },
-  { name: "가게 등록", href: "/store/create", icon: PlusSquare },
 ]
 
 export function Sidebar() {
