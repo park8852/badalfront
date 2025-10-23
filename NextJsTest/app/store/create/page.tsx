@@ -22,7 +22,7 @@ export default function StoreCreatePage() {
     openM: 0,
     closedH: 21,
     closedM: 0,
-    createdAt: new Date().toISOString(),
+    createdAt: new Date().toISOString().slice(0, 10),
   })
 
   function onChange<K extends keyof CreateStoreRequest>(key: K, value: CreateStoreRequest[K]) {
@@ -33,8 +33,8 @@ export default function StoreCreatePage() {
     e.preventDefault()
     try {
       setSaving(true)
-      // Ensure createdAt is always set to the current time on submit
-      await createStore({ ...form, createdAt: new Date().toISOString() })
+      // Ensure createdAt is always the current date (YYYY-MM-DD)
+      await createStore({ ...form, createdAt: new Date().toISOString().slice(0, 10) })
       alert("가게가 등록되었습니다.")
       router.push("/store")
     } catch (err) {
