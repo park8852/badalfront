@@ -24,6 +24,7 @@ export default function StoreManagementPage() {
     openM: 0,
     closedH: 21,
     closedM: 0,
+    thumbnail: "",
   })
 
   // TODO: Replace with actual store ID from auth context
@@ -47,6 +48,7 @@ export default function StoreManagementPage() {
         openM: data.openM,
         closedH: data.closedH,
         closedM: data.closedM,
+        thumbnail: (data as any).thumbnail ?? "",
       })
     } catch (error) {
       console.error("Failed to load store info:", error)
@@ -129,6 +131,16 @@ export default function StoreManagementPage() {
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   />
                 </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="thumbnail">썸네일 이미지 URL</Label>
+                <Input
+                  id="thumbnail"
+                  placeholder="예: https://.../image.jpg"
+                  value={formData.thumbnail}
+                  onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+                />
+              </div>
               </div>
             </Card>
 
