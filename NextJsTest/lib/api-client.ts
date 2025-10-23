@@ -34,6 +34,19 @@ export interface UpdateStoreRequest {
   closed_M: number
 }
 
+// Create Store API request type (different field names than StoreInfo)
+export interface CreateStoreRequest {
+  category: string
+  name: string
+  address: string
+  phone: string
+  openH: number
+  openM: number
+  closedH: number
+  closedM: number
+  createdAt: string
+}
+
 // Menu API types
 export interface MenuItem {
   id: number
@@ -88,6 +101,33 @@ export interface OrderDetail {
 }
 
 // Store API functions
+export async function createStore(data: CreateStoreRequest): Promise<StoreInfo> {
+  const token = getAuthToken()
+  const url = `${API_BASE_URL}/api/store/create`
+
+  console.log("[v0] POST Create Store Request:", { url, token: token ? "present" : "missing", data })
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+
+  console.log("[v0] POST Create Store Response:", { status: response.status, ok: response.ok })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error("[v0] POST Create Store Error:", errorText)
+    throw new Error("Failed to create store")
+  }
+
+  const responseData = await response.json()
+  console.log("[v0] POST Create Store Data:", responseData)
+  return responseData
+}
 export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
   const token = getAuthToken()
   const url = `${API_BASE_URL}/api/store/info/${storeId}`
