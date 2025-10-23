@@ -50,9 +50,6 @@ export default function HomePage() {
             <Button size="lg" variant="outline" onClick={() => router.push("/register")} className="w-full sm:w-auto">
               회원가입
             </Button>
-            <Button size="lg" variant="secondary" onClick={() => router.push("/store/create")} className="w-full sm:w-auto">
-              가게 등록
-            </Button>
           </div>
         </div>
 
