@@ -5,14 +5,13 @@ interface LoginRequest {
   userpw: string
 }
 
+type LoginData = string | { token: string }
+
 interface LoginResponse {
   responseType: "SUCCESS" | "FAIL"
   message: string
-  data?: {
-    token: string
-    userId: string
-    role: string
-  }
+  // On success, backend returns either a token string or an object with token
+  data?: LoginData
 }
 
 interface RegisterRequest {
