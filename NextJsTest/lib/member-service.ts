@@ -8,8 +8,10 @@ interface LoginRequest {
 interface LoginResponse {
   responseType: "SUCCESS" | "FAIL"
   message: string
-  // On success, backend returns the JWT string directly in `data`
-  data?: string
+  // On success, backend returns an object containing the JWT
+  data?: {
+    token: string
+  }
 }
 
 interface RegisterRequest {
