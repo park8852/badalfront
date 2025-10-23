@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { clearAuthInfo } from "@/lib/auth-utils"
 
 const navigation = [
-  { name: "주문 관리", href: "/", icon: Home },
+  { name: "주문 관리", href: "/dashboard", icon: Home },
   { name: "가게 관리", href: "/store", icon: Store },
   { name: "메뉴 관리", href: "/menu", icon: UtensilsCrossed },
 ]

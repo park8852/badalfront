@@ -16,10 +16,10 @@ export interface StoreInfo {
   name: string
   address: string
   phone: string
-  open_H: number
-  open_M: number
-  closed_H: number
-  closed_M: number
+  openH: number
+  openM: number
+  closedH: number
+  closedM: number
   createdAt: string
 }
 
@@ -28,10 +28,10 @@ export interface UpdateStoreRequest {
   name: string
   address: string
   phone: string
-  open_H: number
-  open_M: number
-  closed_H: number
-  closed_M: number
+  openH: number
+  openM: number
+  closedH: number
+  closedM: number
 }
 
 // Menu API types

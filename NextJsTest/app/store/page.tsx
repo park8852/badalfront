@@ -20,10 +20,10 @@ export default function StoreManagementPage() {
     name: "",
     address: "",
     phone: "",
-    open_H: 9,
-    open_M: 0,
-    closed_H: 21,
-    closed_M: 0,
+    openH: 9,
+    openM: 0,
+    closedH: 21,
+    closedM: 0,
   })
 
   // TODO: Replace with actual store ID from auth context
@@ -43,10 +43,10 @@ export default function StoreManagementPage() {
         name: data.name,
         address: data.address,
         phone: data.phone,
-        open_H: data.open_H,
-        open_M: data.open_M,
-        closed_H: data.closed_H,
-        closed_M: data.closed_M,
+        openH: data.openH,
+        openM: data.openM,
+        closedH: data.closedH,
+        closedM: data.closedM,
       })
     } catch (error) {
       console.error("Failed to load store info:", error)
@@ -143,16 +143,16 @@ export default function StoreManagementPage() {
                         type="number"
                         min="0"
                         max="23"
-                        value={formData.open_H}
-                        onChange={(e) => setFormData({ ...formData, open_H: Number.parseInt(e.target.value) })}
+                        value={formData.openH}
+                        onChange={(e) => setFormData({ ...formData, openH: Number.parseInt(e.target.value) })}
                         placeholder="시"
                       />
                       <Input
                         type="number"
                         min="0"
                         max="59"
-                        value={formData.open_M}
-                        onChange={(e) => setFormData({ ...formData, open_M: Number.parseInt(e.target.value) })}
+                        value={formData.openM}
+                        onChange={(e) => setFormData({ ...formData, openM: Number.parseInt(e.target.value) })}
                         placeholder="분"
                       />
                     </div>
@@ -164,16 +164,16 @@ export default function StoreManagementPage() {
                         type="number"
                         min="0"
                         max="23"
-                        value={formData.closed_H}
-                        onChange={(e) => setFormData({ ...formData, closed_H: Number.parseInt(e.target.value) })}
+                        value={formData.closedH}
+                        onChange={(e) => setFormData({ ...formData, closedH: Number.parseInt(e.target.value) })}
                         placeholder="시"
                       />
                       <Input
                         type="number"
                         min="0"
                         max="59"
-                        value={formData.closed_M}
-                        onChange={(e) => setFormData({ ...formData, closed_M: Number.parseInt(e.target.value) })}
+                        value={formData.closedM}
+                        onChange={(e) => setFormData({ ...formData, closedM: Number.parseInt(e.target.value) })}
                         placeholder="분"
                       />
                     </div>
