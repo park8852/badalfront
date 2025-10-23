@@ -42,11 +42,15 @@ const LoginPage = ({ onPageChange, onLoginSuccess }) => {
       const response = await memberService.login(formData)
 
       if (response.responseType === "SUCCESS" && response.data) {
-        const token = typeof response.data === "string" ? response.data : response.data.token
+        const isObjectData = typeof response.data === "object" && response.data !== null
+        const token = isObjectData ? response.data.token : response.data
+        const storeId = isObjectData ? response.data.storeId : undefined
+
         if (!token) {
           setError("토큰이 응답에 없습니다.")
         } else {
-          setAuthInfo({ token, userId: formData.userid, role: "OWNER" })
+          // 로그인 시 토큰과 (있다면) storeId 저장
+          setAuthInfo({ token, userId: formData.userid, role: "OWNER", storeId: typeof storeId === "number" ? storeId : undefined })
           if (onLoginSuccess) onLoginSuccess()
         }
       } else {

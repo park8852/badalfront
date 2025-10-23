@@ -1,6 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { getAuthInfo } from "@/lib/auth-utils"
 import LoginPage from "@/components/login-page"
 
 export default function LoginRoute() {
@@ -15,8 +16,9 @@ export default function LoginRoute() {
   }
 
   const handleLoginSuccess = () => {
-      console.log('로그인 성공 후 대시보드로 이동')
-      router.replace("/dashboard")
+    const auth = getAuthInfo()
+    const hasStore = typeof auth?.storeId === "number"
+    router.replace(hasStore ? "/dashboard" : "/store/create")
   }
 
   return <LoginPage onPageChange={handlePageChange} onLoginSuccess={handleLoginSuccess} />

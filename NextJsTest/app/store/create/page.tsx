@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Store, Clock, Phone, MapPin, Upload, X } from "lucide-react"
 import { createStore, type CreateStoreRequest } from "@/lib/api-client"
-import { setAuthInfo } from "@/lib/auth-utils"
+import { getAuthInfo, setAuthInfo } from "@/lib/auth-utils"
 
 export default function StoreCreatePage() {
   const router = useRouter()
@@ -153,19 +153,23 @@ export default function StoreCreatePage() {
         data: data,
       })
 
-      // 토큰이 있다면 저장
-      if (data?.token) {
+      // 스토어 생성 성공 시 storeId 반영 (응답의 data.id가 storeId)
+      const createdStoreId: number | undefined = typeof data?.id === "number" ? data.id : undefined
+
+      const current = getAuthInfo()
+      if (current?.token) {
         setAuthInfo({
-          token: data.token,
-          userId: data.userId || "",
-          role: "OWNER",
+          token: current.token,
+          userId: current.userId,
+          role: current.role,
+          storeId: createdStoreId,
         })
       }
 
       // 성공 후 대시보드로 이동
       setTimeout(() => {
         router.push("/dashboard")
-      }, 2000)
+      }, 1200)
     } catch (err: any) {
       setResult({
         type: "FAIL",

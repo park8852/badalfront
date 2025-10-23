@@ -6,6 +6,7 @@ import { Plus, Edit, Trash2, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { getMenusByStore, deleteMenu, type MenuItem } from "@/lib/api-client"
+import { getAuthInfo } from "@/lib/auth-utils"
 import { MenuDialog } from "@/components/menu-dialog"
 import { Sidebar } from "@/components/sidebar"
 
@@ -15,14 +16,15 @@ export default function MenuManagementPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingMenu, setEditingMenu] = useState<MenuItem | null>(null)
 
-  // TODO: Replace with actual store ID from auth context
-  const storeId = 1
+  const storeId = getAuthInfo()?.storeId
 
   useEffect(() => {
     loadMenus()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId])
 
   async function loadMenus() {
+    if (!storeId) return
     try {
       setLoading(true)
       const data = await getMenusByStore(storeId)
@@ -65,6 +67,14 @@ export default function MenuManagementPage() {
   }
 
   if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (!storeId) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Eye } from "lucide-react"
 import Link from "next/link"
 import useSWR from "swr"
+import { getAuthInfo } from "@/lib/auth-utils"
 import { getOrdersByStore } from "@/lib/api-client"
 
 function getTimeAgo(dateString: string) {
@@ -19,8 +20,11 @@ function getTimeAgo(dateString: string) {
 }
 
 export function OrderList() {
-  const storeId = 1 // TODO: Get from auth context
-  const { data: orders, error, isLoading } = useSWR(`orders-${storeId}`, () => getOrdersByStore(storeId))
+  const storeId = getAuthInfo()?.storeId
+  const { data: orders, error, isLoading } = useSWR(
+    storeId ? `orders-${storeId}` : null,
+    () => getOrdersByStore(storeId as number)
+  )
 
   return (
     <Card className="p-6">

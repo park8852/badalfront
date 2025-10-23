@@ -3,11 +3,12 @@
 import { Card } from "@/components/ui/card"
 import { Package, DollarSign } from "lucide-react"
 import useSWR from "swr"
+import { getAuthInfo } from "@/lib/auth-utils"
 import { getOrdersByStore } from "@/lib/api-client"
 
 export function DashboardStats() {
-  const storeId = 1 // TODO: Get from auth context
-  const { data: orders } = useSWR(`orders-${storeId}`, () => getOrdersByStore(storeId))
+  const storeId = getAuthInfo()?.storeId
+  const { data: orders } = useSWR(storeId ? `orders-${storeId}` : null, () => getOrdersByStore(storeId as number))
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
