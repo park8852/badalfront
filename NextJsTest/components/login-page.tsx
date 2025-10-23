@@ -41,15 +41,14 @@ const LoginPage = ({ onPageChange, onLoginSuccess }) => {
     try {
       const response = await memberService.login(formData)
 
-      if (response.responseType === "SUCCESS" && response.data?.token) {
-        // 성공: data.token에 토큰 문자열이 들어옴
-        setAuthInfo({
-          token: response.data.token,
-          userId: formData.userid,
-          role: "OWNER",
-        })
-
-        if (onLoginSuccess) onLoginSuccess()
+      if (response.responseType === "SUCCESS" && response.data) {
+        const token = typeof response.data === "string" ? response.data : response.data.token
+        if (!token) {
+          setError("토큰이 응답에 없습니다.")
+        } else {
+          setAuthInfo({ token, userId: formData.userid, role: "OWNER" })
+          if (onLoginSuccess) onLoginSuccess()
+        }
       } else {
         setError(response.message || "로그인에 실패했습니다.")
       }

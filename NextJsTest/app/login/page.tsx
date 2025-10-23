@@ -15,8 +15,8 @@ export default function LoginRoute() {
   }
 
   const handleLoginSuccess = () => {
-      console.log('로그인 성공 후 대시보드로 이동');
-      router.push("/dashboard")
+      console.log('로그인 성공 후 대시보드로 이동')
+      router.replace("/dashboard")
   }
 
   return <LoginPage onPageChange={handlePageChange} onLoginSuccess={handleLoginSuccess} />
