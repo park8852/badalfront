@@ -22,6 +22,7 @@ export default function StoreCreatePage() {
     openM: 0,
     closedH: 21,
     closedM: 0,
+    thumbnail: "",
     createdAt: new Date().toISOString().slice(0, 10),
   })
 
@@ -75,6 +76,16 @@ export default function StoreCreatePage() {
               <div className="grid gap-2">
                 <Label htmlFor="phone">전화번호</Label>
                 <Input id="phone" value={form.phone} onChange={(e) => onChange("phone", e.target.value)} />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="thumbnail">썸네일 이미지 URL</Label>
+                <Input
+                  id="thumbnail"
+                  placeholder="예: https://.../image.jpg"
+                  value={form.thumbnail}
+                  onChange={(e) => onChange("thumbnail", e.target.value)}
+                />
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">

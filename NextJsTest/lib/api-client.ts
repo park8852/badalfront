@@ -20,6 +20,7 @@ export interface StoreInfo {
   openM: number
   closedH: number
   closedM: number
+  thumbnail: string
   createdAt: string
 }
 
@@ -32,6 +33,7 @@ export interface UpdateStoreRequest {
   openM: number
   closedH: number
   closedM: number
+  thumbnail: string
 }
 
 // Create Store API request type (different field names than StoreInfo)
@@ -44,6 +46,7 @@ export interface CreateStoreRequest {
   openM: number
   closedH: number
   closedM: number
+  thumbnail: string
   createdAt: string
 }
 
