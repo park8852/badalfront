@@ -74,3 +74,19 @@ export function handleAuthError(response: Response): boolean {
 export function isLoggedIn(): boolean {
   return isAuthenticated()
 }
+
+// Persist only the store ID (used after store creation)
+export function setStoreId(storeId: number): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("storeId", String(storeId))
+  }
+}
+
+// Convenience accessor for store ID
+export function getStoreId(): number | undefined {
+  if (typeof window !== "undefined") {
+    const stored = localStorage.getItem("storeId")
+    return stored ? Number(stored) : undefined
+  }
+  return undefined
+}

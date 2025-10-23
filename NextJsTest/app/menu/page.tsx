@@ -6,6 +6,7 @@ import { Plus, Edit, Trash2, Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { getMenusByStore, deleteMenu, type MenuItem } from "@/lib/api-client"
+import { getStoreId } from "@/lib/auth-utils"
 import { MenuDialog } from "@/components/menu-dialog"
 import { Sidebar } from "@/components/sidebar"
 
@@ -15,12 +16,14 @@ export default function MenuManagementPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingMenu, setEditingMenu] = useState<MenuItem | null>(null)
 
-  // TODO: Replace with actual store ID from auth context
-  const storeId = 1
+  // Use persisted storeId
+  const storeId = getStoreId() ?? 0
 
   useEffect(() => {
-    loadMenus()
-  }, [])
+    if (storeId > 0) {
+      loadMenus()
+    }
+  }, [storeId])
 
   async function loadMenus() {
     try {
@@ -62,6 +65,14 @@ export default function MenuManagementPage() {
     if (success) {
       loadMenus()
     }
+  }
+
+  if (storeId <= 0) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">가게 ID가 없습니다. 먼저 가게를 등록하세요.</p>
+      </div>
+    )
   }
 
   if (loading) {

@@ -124,9 +124,11 @@ export async function createStore(data: CreateStoreRequest): Promise<StoreInfo> 
     throw new Error("Failed to create store")
   }
 
-  const responseData = await response.json()
-  console.log("[v0] POST Create Store Data:", responseData)
-  return responseData
+  const body = await response.json()
+  console.log("[v0] POST Create Store Data:", body)
+  // Some backends wrap responses as { responseType, data, message }
+  const storeData = body && typeof body === "object" && "responseType" in body && "data" in body ? body.data : body
+  return storeData as StoreInfo
 }
 export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
   const token = getAuthToken()

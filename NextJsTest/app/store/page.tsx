@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useEffect, useState } from "react"
 import { getStoreInfo, updateStoreInfo, type StoreInfo } from "@/lib/api-client"
+import { getStoreId } from "@/lib/auth-utils"
 import { Loader2 } from "lucide-react"
 import { Sidebar } from "@/components/sidebar"
 
@@ -26,12 +27,14 @@ export default function StoreManagementPage() {
     closedM: 0,
   })
 
-  // TODO: Replace with actual store ID from auth context
-  const storeId = 1
+  // Store ID from local storage after creation/login
+  const storeId = getStoreId() ?? 0
 
   useEffect(() => {
-    loadStoreInfo()
-  }, [])
+    if (storeId > 0) {
+      loadStoreInfo()
+    }
+  }, [storeId])
 
   async function loadStoreInfo() {
     try {
@@ -68,6 +71,14 @@ export default function StoreManagementPage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  if (storeId <= 0) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">가게 ID가 없습니다. 먼저 가게를 등록하세요.</p>
+      </div>
+    )
   }
 
   if (loading) {
