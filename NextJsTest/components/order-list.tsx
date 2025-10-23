@@ -6,6 +6,7 @@ import { Eye } from "lucide-react"
 import Link from "next/link"
 import useSWR from "swr"
 import { getOrdersByStore } from "@/lib/api-client"
+import { getStoreId } from "@/lib/auth-utils"
 
 function getTimeAgo(dateString: string) {
   const now = new Date()
@@ -19,8 +20,12 @@ function getTimeAgo(dateString: string) {
 }
 
 export function OrderList() {
-  const storeId = 1 // TODO: Get from auth context
-  const { data: orders, error, isLoading } = useSWR(`orders-${storeId}`, () => getOrdersByStore(storeId))
+  const storeId = getStoreId() ?? 0
+  const shouldFetch = storeId > 0
+  const { data: orders, error, isLoading } = useSWR(
+    shouldFetch ? `orders-${storeId}` : null,
+    () => getOrdersByStore(storeId),
+  )
 
   return (
     <Card className="p-6">
@@ -28,25 +33,25 @@ export function OrderList() {
         <h2 className="text-xl font-semibold">최근 주문</h2>
       </div>
 
-      {isLoading && (
+      {shouldFetch && isLoading && (
         <div className="flex items-center justify-center py-12">
           <p className="text-muted-foreground">주문 내역을 불러오는 중...</p>
         </div>
       )}
 
-      {error && (
+      {shouldFetch && error && (
         <div className="flex items-center justify-center py-12">
           <p className="text-destructive">주문 내역을 불러오는데 실패했습니다.</p>
         </div>
       )}
 
-      {orders && orders.length === 0 && (
+      {shouldFetch && orders && orders.length === 0 && (
         <div className="flex items-center justify-center py-12">
           <p className="text-muted-foreground">주문 내역이 없습니다.</p>
         </div>
       )}
 
-      {orders && orders.length > 0 && (
+      {shouldFetch && orders && orders.length > 0 && (
         <div className="space-y-4">
           {orders.map((order) => (
             <div

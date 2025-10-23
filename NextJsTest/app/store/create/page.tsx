@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Store, Clock, Phone, MapPin, Upload, X } from "lucide-react"
 import { createStore, type CreateStoreRequest } from "@/lib/api-client"
-import { setAuthInfo } from "@/lib/auth-utils"
+import { setAuthInfo, setStoreId } from "@/lib/auth-utils"
 
 export default function StoreCreatePage() {
   const router = useRouter()
@@ -153,7 +153,12 @@ export default function StoreCreatePage() {
         data: data,
       })
 
-      // 토큰이 있다면 저장
+      // 생성된 가게 ID를 저장하여 이후 요청에 사용
+      if (data?.id) {
+        setStoreId(data.id)
+      }
+
+      // 토큰이 있다면 저장 (백엔드가 발급하는 경우 대비)
       if (data?.token) {
         setAuthInfo({
           token: data.token,
