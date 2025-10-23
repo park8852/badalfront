@@ -22,7 +22,7 @@ export default function StoreCreatePage() {
     openM: 0,
     closedH: 21,
     closedM: 0,
-    createdAt: new Date().toISOString().slice(0, 10),
+    createdAt: new Date().toISOString(),
   })
 
   function onChange<K extends keyof CreateStoreRequest>(key: K, value: CreateStoreRequest[K]) {
@@ -33,7 +33,8 @@ export default function StoreCreatePage() {
     e.preventDefault()
     try {
       setSaving(true)
-      await createStore(form)
+      // Ensure createdAt is always set to the current time on submit
+      await createStore({ ...form, createdAt: new Date().toISOString() })
       alert("가게가 등록되었습니다.")
       router.push("/store")
     } catch (err) {
@@ -122,10 +123,7 @@ export default function StoreCreatePage() {
                 </div>
               </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="createdAt">생성일</Label>
-                <Input id="createdAt" type="date" value={form.createdAt} onChange={(e) => onChange("createdAt", e.target.value)} />
-              </div>
+              {/* 생성일은 현재 시간으로 자동 설정되며 화면에 표시하지 않습니다. */}
 
               <div className="flex justify-end">
                 <Button type="submit" disabled={saving}>
