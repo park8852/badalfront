@@ -74,7 +74,7 @@ export function OrderList() {
 
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <p className="text-lg font-bold">{order.total_price.toLocaleString()}원</p>
+                  <p className="text-lg font-bold">{Number(order.total_price ?? 0).toLocaleString()}원</p>
                 </div>
                 <Link href={`/orders/${order.id}`}>
                   <Button variant="outline" size="sm">
