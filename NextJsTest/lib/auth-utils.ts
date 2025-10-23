@@ -47,3 +47,30 @@ export function clearAuthInfo(): void {
 export function isAuthenticated(): boolean {
   return getAuthInfo() !== null
 }
+
+// Vite React 프로젝트와의 호환성을 위한 추가 함수들
+export function getAuthHeaders(): Record<string, string> {
+  const authInfo = getAuthInfo()
+  if (authInfo?.token) {
+    return {
+      Authorization: `Bearer ${authInfo.token}`,
+      "Content-Type": "application/json",
+    }
+  }
+  return {
+    "Content-Type": "application/json",
+  }
+}
+
+export function handleAuthError(response: Response): boolean {
+  if (response.status === 401) {
+    clearAuthInfo()
+    return true
+  }
+  return false
+}
+
+// 로그인 상태 확인 (Vite React와 동일한 인터페이스)
+export function isLoggedIn(): boolean {
+  return isAuthenticated()
+}
