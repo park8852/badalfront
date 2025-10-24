@@ -271,6 +271,10 @@ export async function createMenu(data: CreateMenuRequest): Promise<MenuItem> {
 
     const responseData = await response.json()
     console.log("[v0] POST Create Menu Data:", responseData)
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 8c6f9f31fca979b07227aed44b2786e49bb958f0
     // API 응답에서 data 필드만 추출하여 반환
     const unwrapped = responseData && typeof responseData === "object" && "data" in responseData ? responseData.data : responseData
     return unwrapped as MenuItem
