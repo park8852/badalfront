@@ -307,12 +307,12 @@ export async function updateMenu(menuId: number, data: UpdateMenuRequest): Promi
 
 export async function deleteMenu(menuId: number): Promise<void> {
     const token = getAuthToken()
-    const url = `${API_BASE_URL}/api/menu/info/${menuId}`
+    const url = `${API_BASE_URL}/api/menu/delete/${menuId}`
 
     console.log("[v0] DELETE Menu Request:", { url, token: token ? "present" : "missing", menuId })
 
     const response = await fetch(url, {
-        method: "DELETE",
+        method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
