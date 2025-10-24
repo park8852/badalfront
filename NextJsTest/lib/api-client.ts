@@ -125,8 +125,10 @@ export async function createStore(data: CreateStoreRequest): Promise<StoreInfo> 
   }
 
   const responseData = await response.json()
-  console.log("[v0] POST Create Store Data:", responseData)
-  return responseData
+  // Some backends wrap the result as { responseType, data, message }
+  const unwrapped = responseData && typeof responseData === "object" && "data" in responseData ? responseData.data : responseData
+  console.log("[v0] POST Create Store Data:", unwrapped)
+  return unwrapped as StoreInfo
 }
 export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
   const token = getAuthToken()
