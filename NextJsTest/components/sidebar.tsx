@@ -2,11 +2,11 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
-import { ShoppingCart, Store, UtensilsCrossed, LogOut, ChevronLeft, ChevronRight } from "lucide-react"
+import { ShoppingCart, Store, UtensilsCrossed, LogOut, ChevronLeft, ChevronRight, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { clearAuthInfo } from "@/lib/auth-utils"
+import { clearAuthInfo, getAuthInfo } from "@/lib/auth-utils"
 
 const navigation = [
   { name: "주문 관리", href: "/dashboard", icon: ShoppingCart },
@@ -18,6 +18,14 @@ export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [authInfo, setAuthInfo] = useState<any>(null)
+  const [isClient, setIsClient] = useState(false)
+  
+  // Get user info from localStorage on client side only
+  useEffect(() => {
+    setIsClient(true)
+    setAuthInfo(getAuthInfo())
+  }, [])
 
   const handleLogout = () => {
     clearAuthInfo()
@@ -91,8 +99,34 @@ export function Sidebar() {
           })}
         </nav>
 
-        {/* 로그아웃 버튼 */}
-        <div className="border-t p-4">
+        {/* 사용자 정보 및 마이페이지 */}
+        <div className="border-t p-4 space-y-2">
+          {/* 사용자 이름 */}
+          {isClient && !isCollapsed && authInfo?.userId && (
+            <div className="px-4 py-2">
+              <p className="text-sm text-sidebar-foreground/70">안녕하세요</p>
+              <p className="text-sm font-medium text-sidebar-foreground">{authInfo.userId}님</p>
+            </div>
+          )}
+          
+          {/* 마이페이지 버튼 */}
+          <Button
+            variant="ghost"
+            className={cn(
+              "flex items-center rounded-lg px-4 py-3 text-sm font-medium transition-colors w-full",
+              "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+              isCollapsed ? "justify-center" : "justify-start"
+            )}
+            onClick={() => router.push("/myinfo")}
+            title={isCollapsed ? "마이페이지" : undefined}
+          >
+            <span className="inline-flex h-5 w-5 items-center justify-center shrink-0">
+              <User className="h-5 w-5" />
+            </span>
+            {!isCollapsed && <span className="ml-3">마이페이지</span>}
+          </Button>
+          
+          {/* 로그아웃 버튼 */}
           <Button
             variant="ghost"
             className={cn(

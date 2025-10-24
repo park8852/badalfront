@@ -3,6 +3,15 @@ import { getAuthHeaders, handleAuthError } from './auth-utils'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://192.168.72.196:8080'
 
+// 회원정보 수정 요청 타입
+export interface UpdateMemberRequest {
+  name: string
+  email: string
+  phone: string
+  address: string
+  birth: string
+}
+
 export const memberService = {
   // 회원가입
   async register(memberData: any) {
@@ -96,8 +105,8 @@ export const memberService = {
     }
   },
 
-  // 회원정보변경
-  async updateMyInfo(memberData: any) {
+  // 회원정보변경 (POST 방식)
+  async updateMyInfo(memberData: UpdateMemberRequest) {
     try {
       const response = await fetch(`${API_BASE_URL}/api/member/info`, {
         method: 'POST',

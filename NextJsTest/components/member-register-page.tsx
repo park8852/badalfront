@@ -3,6 +3,7 @@
 import type React from "react"
 import { useMemo, useState, useEffect, useRef } from "react"
 import { memberService } from "@/lib/member-service"
+import { useRouter } from "next/navigation"
 
 // Utilities --------------------------------------------------------------
 const pad = (n: number) => String(n).padStart(2, "0")
@@ -241,6 +242,7 @@ interface FormData {
 }
 
 export default function MemberRegisterPage() {
+    const router = useRouter()
   const [form, setForm] = useState<FormData>({
     userid: "",
     userpw: "",
@@ -397,6 +399,8 @@ export default function MemberRegisterPage() {
         message: data.message || "회원가입이 완료되었습니다.",
         data: data.data,
       })
+        // 회원가입 성공 후 로그인 페이지로 이동
+        router.push("/login")
     } catch (err: any) {
       setResult({
         type: "FAIL",

@@ -17,11 +17,7 @@ export default function MobileAppPage() {
     setAuthInfo(auth)
     setIsLoading(false)
 
-    // OWNER 역할인 경우 대시보드로 리다이렉트
-    if (auth && auth.role === "OWNER") {
-      router.replace("/dashboard")
-    }
-  }, [router])
+  }, [])
 
   const handleGoBack = () => {
     // 로그아웃 + 로그인 페이지로 이동
