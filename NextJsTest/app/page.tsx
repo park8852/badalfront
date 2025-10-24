@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getAuthInfo, clearAuthInfo } from "@/lib/auth-utils"
+import { memberService } from "@/lib/member-service"
 import { Smartphone, Download, QrCode, ArrowLeft, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
@@ -16,7 +17,22 @@ export default function MobileAppPage() {
     const auth = getAuthInfo()
     setAuthInfo(auth)
     setIsLoading(false)
-  }, [])
+
+    // OWNER라면 서버에 토큰 유효성 검증 후에만 대시보드로 이동
+    const verifyAndRedirect = async () => {
+      if (auth && auth.role === "OWNER") {
+        try {
+          await memberService.getMyInfo()
+          router.replace("/dashboard")
+        } catch {
+          // 토큰 무효 시 정리만 하고 루트에 머무름
+          clearAuthInfo()
+        }
+      }
+    }
+
+    void verifyAndRedirect()
+  }, [router])
 
   const handleGoBack = () => {
     // 로그아웃 + 로그인 페이지로 이동
