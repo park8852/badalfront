@@ -9,8 +9,10 @@ export function setAuthInfo(data: AuthInfo): void {
   if (typeof window !== "undefined") {
     localStorage.setItem("authToken", data.token)
     localStorage.setItem("userId", data.userId)
-    if (data.storeId) {
+    if (typeof data.storeId === "number") {
       localStorage.setItem("storeId", String(data.storeId))
+    }else {
+      localStorage.removeItem("storeId")
     }
     localStorage.setItem("role", data.role)
   }

@@ -8,13 +8,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useEffect, useState } from "react"
 import { getStoreInfo, updateStoreInfo, type StoreInfo } from "@/lib/api-client"
-import { getAuthInfo } from "@/lib/auth-utils"
-import { Loader2 } from "lucide-react"
+import { Loader2, Upload, X } from "lucide-react"
 import { Sidebar } from "@/components/sidebar"
+import Image from "next/image"
+import { getAuthInfo } from "@/lib/auth-utils"
 
 export default function StoreManagementPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   const [storeData, setStoreData] = useState<StoreInfo | null>(null)
   const [formData, setFormData] = useState({
     category: "",
@@ -25,9 +27,14 @@ export default function StoreManagementPage() {
     openM: 0,
     closedH: 21,
     closedM: 0,
+    logo: "",
   })
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string>("")
 
-  const storeId = getAuthInfo()?.storeId
+  // Get store ID from localStorage
+  const authInfo = getAuthInfo()
+  const storeId = authInfo?.storeId
 
   useEffect(() => {
     if (storeId) {
@@ -36,7 +43,12 @@ export default function StoreManagementPage() {
   }, [storeId])
 
   async function loadStoreInfo() {
-    if (!storeId) return
+    if (!storeId) {
+      console.error("Store ID not found in localStorage")
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       const data = await getStoreInfo(storeId)
@@ -50,7 +62,9 @@ export default function StoreManagementPage() {
         openM: data.openM,
         closedH: data.closedH,
         closedM: data.closedM,
+        logo: data.logo || "",
       })
+      setLogoPreview(data.logo || "")
     } catch (error) {
       console.error("Failed to load store info:", error)
     } finally {
@@ -58,14 +72,63 @@ export default function StoreManagementPage() {
     }
   }
 
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setLogoFile(file)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemoveLogo = () => {
+    setLogoFile(null)
+    setLogoPreview("")
+    setFormData({ ...formData, logo: "" })
+  }
+
+  const handleEdit = () => {
+    setIsEditing(true)
+  }
+
+  const handleCancel = () => {
+    setIsEditing(false)
+    // 폼 데이터를 원래 데이터로 되돌리기
+    if (storeData) {
+      setFormData({
+        category: storeData.category,
+        name: storeData.name,
+        address: storeData.address,
+        phone: storeData.phone,
+        openH: storeData.openH,
+        openM: storeData.openM,
+        closedH: storeData.closedH,
+        closedM: storeData.closedM,
+        logo: storeData.logo || "",
+      })
+      setLogoPreview(storeData.logo || "")
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!storeId) return
+    
+    if (!storeId) {
+      alert("가게 ID를 찾을 수 없습니다. 다시 로그인해주세요.")
+      return
+    }
+
     try {
       setSaving(true)
-      await updateStoreInfo(storeId, formData)
+      // logo 필드를 제외하고 API 요청
+      const { logo, ...updateData } = formData
+      await updateStoreInfo(storeId, updateData)
       alert("가게 정보가 저장되었습니다.")
       await loadStoreInfo()
+      setIsEditing(false)
     } catch (error) {
       console.error("Failed to update store info:", error)
       alert("저장에 실패했습니다.")
@@ -93,113 +156,181 @@ export default function StoreManagementPage() {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <Card className="p-6">
-              <h2 className="mb-6 text-xl font-semibold">기본 정보</h2>
-              <div className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="category">카테고리</Label>
-                  <Input
-                    id="category"
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    placeholder="예: Korean, Chinese, Japanese"
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="storeName">가게 이름</Label>
-                  <Input
-                    id="storeName"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="phone">전화번호</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="address">주소</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="mt-6 p-6">
-              <h2 className="mb-6 text-xl font-semibold">운영 시간</h2>
-              <div className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
+            {/* 기본 정보와 우측 섹션을 나란히 배치 */}
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+              {/* 기본 정보 카드 - 좌측 (7/10) */}
+              <Card className="p-6 lg:col-span-7">
+                <h2 className="mb-6 text-xl font-semibold">기본 정보</h2>
+                <div className="space-y-4">
                   <div className="grid gap-2">
-                    <Label>오픈 시간</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="number"
-                        min="0"
-                        max="23"
-                        value={formData.openH}
-                        onChange={(e) => setFormData({ ...formData, openH: Number.parseInt(e.target.value) })}
-                        placeholder="시"
-                      />
-                      <Input
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={formData.openM}
-                        onChange={(e) => setFormData({ ...formData, openM: Number.parseInt(e.target.value) })}
-                        placeholder="분"
-                      />
-                    </div>
+                    <Label htmlFor="category">카테고리</Label>
+                    <Input
+                      id="category"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                      placeholder="예: Korean, Chinese, Japanese"
+                      disabled={!isEditing}
+                    />
                   </div>
+
                   <div className="grid gap-2">
-                    <Label>마감 시간</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="number"
-                        min="0"
-                        max="23"
-                        value={formData.closedH}
-                        onChange={(e) => setFormData({ ...formData, closedH: Number.parseInt(e.target.value) })}
-                        placeholder="시"
-                      />
-                      <Input
-                        type="number"
-                        min="0"
-                        max="59"
-                        value={formData.closedM}
-                        onChange={(e) => setFormData({ ...formData, closedM: Number.parseInt(e.target.value) })}
-                        placeholder="분"
-                      />
-                    </div>
+                    <Label htmlFor="storeName">가게 이름</Label>
+                    <Input
+                      id="storeName"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      disabled={!isEditing}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="phone">전화번호</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      disabled={!isEditing}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label htmlFor="address">주소</Label>
+                    <Input
+                      id="address"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      disabled={!isEditing}
+                    />
                   </div>
                 </div>
+              </Card>
+
+              {/* 우측 섹션 - 운영시간과 가게 로고 (3/10) */}
+              <div className="flex flex-col lg:col-span-3 h-full gap-6">
+                {/* 운영 시간 카드 (6/10) */}
+                <Card className="p-6 flex-[6]">
+                  <h2 className="mb-2 text-xl font-semibold">운영 시간</h2>
+                  <div className="space-y-4">
+                    <div className="grid gap-6">
+                      <div className="grid gap-2">
+                        <Label>오픈 시간</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="23"
+                            value={formData.openH}
+                            onChange={(e) => setFormData({ ...formData, openH: Number.parseInt(e.target.value) })}
+                            placeholder="시"
+                            disabled={!isEditing}
+                          />
+                          <Input
+                            type="number"
+                            min="0"
+                            max="59"
+                            value={formData.openM}
+                            onChange={(e) => setFormData({ ...formData, openM: Number.parseInt(e.target.value) })}
+                            placeholder="분"
+                            disabled={!isEditing}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>마감 시간</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="number"
+                            min="0"
+                            max="23"
+                            value={formData.closedH}
+                            onChange={(e) => setFormData({ ...formData, closedH: Number.parseInt(e.target.value) })}
+                            placeholder="시"
+                            disabled={!isEditing}
+                          />
+                          <Input
+                            type="number"
+                            min="0"
+                            max="59"
+                            value={formData.closedM}
+                            onChange={(e) => setFormData({ ...formData, closedM: Number.parseInt(e.target.value) })}
+                            placeholder="분"
+                            disabled={!isEditing}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* 가게 로고 카드 (4/10) */}
+                <Card className="p-6 flex-[4]">
+                  <h2 className="mb-1 text-xl font-semibold">가게 로고</h2>
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="flex-shrink-0">
+                      {logoPreview ? (
+                        <div className="relative">
+                          <Image
+                            src={logoPreview}
+                            alt="가게 로고"
+                            width={120}
+                            height={120}
+                            className="rounded-lg object-cover border-2 border-gray-200"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                            onClick={handleRemoveLogo}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                          <div className="w-30 h-30 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50">
+                            <Upload className="h-8 w-8 text-gray-400" />
+                          </div>
+                        )}
+                    </div>
+                    <div className="w-full">
+                      <Input
+                        id="logo"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="mb-2"
+                        disabled={!isEditing}
+                      />
+                      
+                    </div>
+                  </div>
+                </Card>
               </div>
-            </Card>
+            </div>
 
             <div className="mt-6 flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={loadStoreInfo}>
-                취소
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    저장 중...
-                  </>
-                ) : (
-                  "저장하기"
-                )}
-              </Button>
+              {!isEditing ? (
+                <Button type="button" onClick={handleEdit}>
+                  수정하기
+                </Button>
+              ) : (
+                <>
+                  <Button type="button" variant="outline" onClick={handleCancel}>
+                    취소
+                  </Button>
+                  <Button type="submit" disabled={saving}>
+                    {saving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        저장 중...
+                      </>
+                    ) : (
+                      "저장하기"
+                    )}
+                  </Button>
+                </>
+              )}
             </div>
           </form>
         </div>

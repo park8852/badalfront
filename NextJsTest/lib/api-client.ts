@@ -20,6 +20,7 @@ export interface StoreInfo {
   openM: number
   closedH: number
   closedM: number
+  logo?: string
   createdAt: string
 }
 
@@ -32,6 +33,7 @@ export interface UpdateStoreRequest {
   openM: number
   closedH: number
   closedM: number
+  logo?: string
 }
 
 // Create Store API request type (different field names than StoreInfo)
@@ -125,8 +127,9 @@ export async function createStore(data: CreateStoreRequest): Promise<StoreInfo> 
   }
 
   const responseData = await response.json()
-  console.log("[v0] POST Create Store Data:", responseData)
-  return responseData
+  const unwrapped = responseData && typeof responseData === "object" && "data" in responseData ? responseData.data : responseData
+  console.log("[v0] POST Create Store Data:", unwrapped)
+  return unwrapped as StoreInfo
 }
 export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
   const token = getAuthToken()
@@ -149,14 +152,20 @@ export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
     throw new Error("Failed to fetch store info")
   }
 
-  const data = await response.json()
-  console.log("[v0] GET Store Info Data:", data)
-  return data
+  const responseData = await response.json()
+  console.log("[v0] GET Store Info Data:", responseData)
+  
+  // Map thumbnail to logo field
+  if (responseData.data) {
+    responseData.data.logo = responseData.data.thumbnail
+  }
+  
+  return responseData.data
 }
 
 export async function updateStoreInfo(storeId: number, data: UpdateStoreRequest): Promise<StoreInfo> {
   const token = getAuthToken()
-  const url = `${API_BASE_URL}/api/store/info/${storeId}`
+  const url = `${API_BASE_URL}/api/store/info`
 
   console.log("[v0] POST Update Store Request:", { url, token: token ? "present" : "missing", data })
 

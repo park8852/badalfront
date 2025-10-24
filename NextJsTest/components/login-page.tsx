@@ -1,10 +1,17 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { memberService } from "@/lib/member-service"
 import { setAuthInfo } from "@/lib/auth-utils"
 
-const LoginPage = ({ onPageChange, onLoginSuccess }) => {
+interface LoginPageProps {
+  onPageChange: (page: string) => void
+  onLoginSuccess: () => void
+}
+
+const LoginPage = ({ onPageChange, onLoginSuccess }: LoginPageProps) => {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     userid: "",
     userpw: "",
@@ -12,7 +19,7 @@ const LoginPage = ({ onPageChange, onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
@@ -22,7 +29,7 @@ const LoginPage = ({ onPageChange, onLoginSuccess }) => {
     if (error) setError("")
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     // 입력값 검증
@@ -42,23 +49,37 @@ const LoginPage = ({ onPageChange, onLoginSuccess }) => {
       const response = await memberService.login(formData)
 
       if (response.responseType === "SUCCESS" && response.data) {
-        const isObjectData = typeof response.data === "object" && response.data !== null
-        const token = isObjectData ? response.data.token : response.data
-        const storeId = isObjectData ? response.data.storeId : undefined
-
+        const token = typeof response.data === "string" ? response.data : response.data.token
+        const storeId = response.data.storeId || response.data.store_id || null
+        
         if (!token) {
           setError("토큰이 응답에 없습니다.")
         } else {
-          // 로그인 시 토큰과 (있다면) storeId 저장
-          setAuthInfo({ token, userId: formData.userid, role: "OWNER", storeId: typeof storeId === "number" ? storeId : undefined })
-          if (onLoginSuccess) onLoginSuccess()
+          // 역할 결정 (일관성 있게 USER를 기본값으로 설정)
+          const userRole = response.data.role || "OWNER"
+          
+          setAuthInfo({ 
+            token, 
+            userId: formData.userid, 
+            role: userRole,
+            storeId: storeId
+          })
+          
+          // 역할에 따른 리다이렉트
+          if (userRole === "USER") {
+            console.log('USER 역할로 로그인 - 모바일 앱 페이지로 이동')
+            router.replace("/mobile-app")
+          } else {
+            console.log('OWNER 역할로 로그인 - 대시보드로 이동')
+            if (onLoginSuccess) onLoginSuccess()
+          }
         }
       } else {
         setError(response.message || "로그인에 실패했습니다.")
       }
     } catch (error) {
       console.error("로그인 오류:", error)
-      setError(error.message || "로그인 중 오류가 발생했습니다.")
+      setError(error instanceof Error ? error.message : "로그인 중 오류가 발생했습니다.")
     } finally {
       setIsLoading(false)
     }
