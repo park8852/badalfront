@@ -67,6 +67,10 @@ export function getAuthHeaders(): Record<string, string> {
 export function handleAuthError(response: Response): boolean {
   if (response.status === 401) {
     clearAuthInfo()
+    // 토큰 만료 시 로그인 페이지로 리다이렉션
+    if (typeof window !== "undefined") {
+      window.location.href = "/login"
+    }
     return true
   }
   return false

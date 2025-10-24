@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,12 +8,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Store, Clock, Phone, MapPin, Upload, X } from "lucide-react"
+import { Loader2, Store, Clock, Phone, MapPin, Upload, X, LogOut, LogIn } from "lucide-react"
 import { createStore, type CreateStoreRequest } from "@/lib/api-client"
-import { getAuthInfo, setAuthInfo } from "@/lib/auth-utils"
+import { getAuthInfo, setAuthInfo, clearAuthInfo } from "@/lib/auth-utils"
+import Image from "next/image"
 
 export default function StoreCreatePage() {
   const router = useRouter()
+  const [authInfo, setAuthInfo] = useState<any>(null)
+  const [isClient, setIsClient] = useState(false)
   const [form, setForm] = useState({
     name: "",
     category: "중국집",
@@ -27,6 +30,18 @@ export default function StoreCreatePage() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<{ type: string; message: string; data?: any } | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // 클라이언트 사이드에서만 authInfo 로드
+  useEffect(() => {
+    setIsClient(true)
+    setAuthInfo(getAuthInfo())
+  }, [])
+
+  // 로그아웃 핸들러
+  const handleLogout = () => {
+    clearAuthInfo()
+    router.push("/login")
+  }
 
   const categories = [
     "한식",
@@ -205,17 +220,43 @@ export default function StoreCreatePage() {
       {/* Top bar */}
       <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/90 border-b">
         <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-blue-600 grid place-items-center text-white font-bold">店</div>
-            <div>
-              <h1 className="text-lg font-semibold">가게 등록</h1>
-              <p className="text-xs text-slate-500">필수 정보를 입력하고 등록 버튼을 누르세요.</p>
-            </div>
+          {/* 로고 - 홈으로 리다이렉션 */}
+          <div className="flex items-center">
+            <button 
+              onClick={() => router.push("/")}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <Image 
+                src="/logo_black.png" 
+                alt="바로배달 로고" 
+                width={120} 
+                height={30}
+                className="object-contain"
+              />
+            </button>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-xs text-slate-500">
-            <span className="px-2 py-1 rounded bg-slate-100">Next.js</span>
-            <span className="px-2 py-1 rounded bg-slate-100">React</span>
-            <span className="px-2 py-1 rounded bg-slate-100">Tailwind</span>
+          
+          {/* 로그인/로그아웃 버튼 */}
+          <div className="flex items-center">
+            {isClient && authInfo ? (
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="px-6 flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                로그아웃
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => router.push("/login")}
+                className="px-6 flex items-center gap-2"
+              >
+                <LogIn className="h-4 w-4" />
+                로그인
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -264,7 +305,7 @@ export default function StoreCreatePage() {
                       {errors.category && <span className="text-red-500">{errors.category}</span>}
                     </Label>
                     <Select value={form.category} onValueChange={handleCategoryChange}>
-                      <SelectTrigger className={errors.category ? "border-red-400" : ""}>
+                      <SelectTrigger className={`w-full ${errors.category ? "border-red-400" : ""}`}>
                         <SelectValue placeholder="카테고리를 선택하세요" />
                       </SelectTrigger>
                       <SelectContent>

@@ -4,6 +4,10 @@ import type React from "react"
 import { useMemo, useState, useEffect, useRef } from "react"
 import { memberService } from "@/lib/member-service"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { getAuthInfo, clearAuthInfo } from "@/lib/auth-utils"
+import { LogOut, LogIn } from "lucide-react"
 
 // Utilities --------------------------------------------------------------
 const pad = (n: number) => String(n).padStart(2, "0")
@@ -243,6 +247,8 @@ interface FormData {
 
 export default function MemberRegisterPage() {
     const router = useRouter()
+  const [authInfo, setAuthInfo] = useState<any>(null)
+  const [isClient, setIsClient] = useState(false)
   const [form, setForm] = useState<FormData>({
     userid: "",
     userpw: "",
@@ -259,6 +265,18 @@ export default function MemberRegisterPage() {
   const [showPw, setShowPw] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+
+  // 클라이언트 사이드에서만 authInfo 로드
+  useEffect(() => {
+    setIsClient(true)
+    setAuthInfo(getAuthInfo())
+  }, [])
+
+  // 로그아웃 핸들러
+  const handleLogout = () => {
+    clearAuthInfo()
+    router.push("/login")
+  }
 
   const roles = [
     { value: "USER", label: "일반 사용자", desc: "주문과 리뷰를 이용해요." },
@@ -394,13 +412,44 @@ export default function MemberRegisterPage() {
 
     try {
       const data = await memberService.register(requestData)
-      setResult({
-        type: data.responseType || "SUCCESS",
-        message: data.message || "회원가입이 완료되었습니다.",
-        data: data.data,
-      })
+      
+      // 서버 응답 확인
+      if (data.responseType === "SUCCESS") {
+        setResult({
+          type: "SUCCESS",
+          message: data.message || "회원가입이 완료되었습니다.",
+          data: data.data,
+        })
         // 회원가입 성공 후 로그인 페이지로 이동
-        router.push("/login")
+        setTimeout(() => {
+          router.push("/login")
+        }, 1500)
+      } else if (data.responseType === "ERROR") {
+        // 서버 에러 응답 처리
+        const serverErrors: Record<string, string> = {}
+        
+        // 아이디 중복 에러 처리
+        if (data.message?.includes("이미 존재하는 아이디")) {
+          serverErrors.userid = data.message
+        }
+        // 이메일 중복 에러 처리
+        else if (data.message?.includes("이미 존재하는 이메일")) {
+          serverErrors.email = data.message
+        }
+        // 전화번호 중복 에러 처리
+        else if (data.message?.includes("이미 존재하는 전화번호")) {
+          serverErrors.phone = data.message
+        }
+        // 기타 에러
+        else {
+          setResult({
+            type: "ERROR",
+            message: data.message || "회원가입 중 오류가 발생했습니다.",
+          })
+        }
+        
+        setErrors(serverErrors)
+      }
     } catch (err: any) {
       setResult({
         type: "FAIL",
@@ -425,17 +474,43 @@ export default function MemberRegisterPage() {
       {/* Top bar */}
       <header className="sticky top-0 z-10 backdrop-blur supports-[backdrop-filter]:bg-white/70 bg-white/90 border-b">
         <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-blue-600 grid place-items-center text-white font-bold">人</div>
-            <div>
-              <h1 className="text-lg font-semibold">회원가입</h1>
-              <p className="text-xs text-slate-500">필수 정보를 입력하고 가입 버튼을 눌러주세요.</p>
-            </div>
+          {/* 로고 - 홈으로 리다이렉션 */}
+          <div className="flex items-center">
+            <button 
+              onClick={() => router.push("/")}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <Image 
+                src="/logo_black.png" 
+                alt="바로배달 로고" 
+                width={120} 
+                height={30}
+                className="object-contain"
+              />
+            </button>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-xs text-slate-500">
-            <span className="px-2 py-1 rounded bg-slate-100">Next.js</span>
-            <span className="px-2 py-1 rounded bg-slate-100">React</span>
-            <span className="px-2 py-1 rounded bg-slate-100">Tailwind</span>
+          
+          {/* 로그인/로그아웃 버튼 */}
+          <div className="flex items-center">
+            {isClient && authInfo ? (
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="px-6 flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                로그아웃
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => router.push("/login")}
+                className="px-6 flex items-center gap-2"
+              >
+                <LogIn className="h-4 w-4" />
+                로그인
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -482,7 +557,7 @@ export default function MemberRegisterPage() {
                       onChange={handleChange}
                       placeholder="영문/숫자 3자 이상"
                       aria-invalid={!!errors.userid}
-                      className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 ${
+                      className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400 ${
                         errors.userid ? "border-red-400" : "border-slate-300"
                       }`}
                     />
@@ -501,7 +576,7 @@ export default function MemberRegisterPage() {
                         onChange={handleChange}
                         placeholder="6자 이상 (영문/숫자/특수문자 조합 권장)"
                         aria-invalid={!!errors.userpw}
-                        className={`w-full rounded-xl border px-3 py-2.5 pr-10 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 ${
+                        className={`w-full rounded-xl border px-3 py-2.5 pr-10 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400 ${
                           errors.userpw ? "border-red-400" : "border-slate-300"
                         }`}
                       />
@@ -550,7 +625,7 @@ export default function MemberRegisterPage() {
                       onChange={handleChange}
                       placeholder="홍길동"
                       aria-invalid={!!errors.name}
-                      className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 ${
+                      className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400 ${
                         errors.name ? "border-red-400" : "border-slate-300"
                       }`}
                     />
@@ -572,7 +647,7 @@ export default function MemberRegisterPage() {
                           placeholder="YYYY-MM-DD"
                           readOnly
                           aria-invalid={!!errors.birth}
-                          className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 cursor-pointer ${
+                          className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 cursor-pointer placeholder:text-slate-400 ${
                             errors.birth ? "border-red-400" : "border-slate-300"
                           }`}
                         />
@@ -613,7 +688,7 @@ export default function MemberRegisterPage() {
                       placeholder="010-1234-5678"
                       inputMode="numeric"
                       aria-invalid={!!errors.phone}
-                      className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 ${
+                      className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400 ${
                         errors.phone ? "border-red-400" : "border-slate-300"
                       }`}
                     />
@@ -633,7 +708,7 @@ export default function MemberRegisterPage() {
                         onChange={handleChange}
                         placeholder="example@email.com"
                         aria-invalid={!!errors.email}
-                        className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 ${
+                        className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400 ${
                           errors.email ? "border-red-400" : "border-slate-300"
                         }`}
                       />
@@ -667,7 +742,7 @@ export default function MemberRegisterPage() {
                     onChange={handleChange}
                     placeholder="서울특별시 중구 …"
                     aria-invalid={!!errors.address}
-                    className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 ${
+                    className={`w-full rounded-xl border px-3 py-2.5 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400 ${
                       errors.address ? "border-red-400" : "border-slate-300"
                     }`}
                   />
@@ -771,11 +846,7 @@ export default function MemberRegisterPage() {
                     </div>
                   </div>
 
-                  {Object.keys(errors).length > 0 && (
-                    <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                      입력값을 확인해주세요: {Object.values(errors).join(" · ")}
-                    </div>
-                  )}
+                  
 
                   {!result && (
                     <p className="mt-4 text-xs text-slate-500">제출 전에 우측 카드로 입력 내용을 점검하세요.</p>

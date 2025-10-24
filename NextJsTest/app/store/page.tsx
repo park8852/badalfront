@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useEffect, useState } from "react"
 import { getStoreInfo, updateStoreInfo, type StoreInfo } from "@/lib/api-client"
 import { Loader2, Upload, X } from "lucide-react"
@@ -31,6 +32,22 @@ export default function StoreManagementPage() {
   })
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string>("")
+
+  const defaultCategories = [
+    "한식",
+    "일식",
+    "중식",
+    "분식",
+    "양식",
+    "치킨",
+    "피자",
+    "카페/디저트",
+  ]
+
+  // 현재 카테고리가 기본 목록에 없으면 추가
+  const categories = formData.category && !defaultCategories.includes(formData.category)
+    ? [formData.category, ...defaultCategories]
+    : defaultCategories
 
   // Get store ID from localStorage
   const authInfo = getAuthInfo()
@@ -164,13 +181,22 @@ export default function StoreManagementPage() {
                 <div className="space-y-4">
                   <div className="grid gap-2">
                     <Label htmlFor="category">카테고리</Label>
-                    <Input
-                      id="category"
+                    <Select
                       value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      placeholder="예: Korean, Chinese, Japanese"
+                      onValueChange={(value) => setFormData({ ...formData, category: value })}
                       disabled={!isEditing}
-                    />
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={formData.category || "카테고리를 선택하세요"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="grid gap-2">

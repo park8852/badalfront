@@ -1,0 +1,350 @@
+"use client"
+
+import React, { useMemo, useState } from "react"
+import { CalendarDays, X, Check, CalendarRange, TrendingUp, DollarSign, ShoppingBag } from "lucide-react"
+import { DayPicker } from "react-day-picker"
+import "react-day-picker/dist/style.css"
+import { format, startOfWeek, endOfWeek, addWeeks, startOfMonth, endOfMonth } from "date-fns"
+import { ko } from "date-fns/locale"
+import { motion, AnimatePresence } from "framer-motion"
+import { Sidebar } from "@/components/sidebar"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+
+// Date helpers
+type Range = { from?: Date; to?: Date } | undefined
+
+function fmt(d?: Date) {
+  return d ? format(d, "yyyy-MM-dd", { locale: ko }) : "-"
+}
+
+export default function RevenuePage() {
+  const [open, setOpen] = useState(false)
+  const [range, setRange] = useState<Range>()
+
+  const label = useMemo(() => {
+    if (range?.from && range?.to) return `${fmt(range.from)} ~ ${fmt(range.to)}`
+    if (range?.from) return `${fmt(range.from)} ~ 선택중`
+    return "기간을 선택하세요"
+  }, [range])
+
+  // Quick presets
+  const today = new Date()
+  const presets = [
+    {
+      name: "오늘",
+      run: () => setRange({ from: today, to: today }),
+    },
+    {
+      name: "내일",
+      run: () => {
+        const tmr = new Date()
+        tmr.setDate(tmr.getDate() + 1)
+        setRange({ from: tmr, to: tmr })
+      },
+    },
+    {
+      name: "이번 주",
+      run: () => {
+        const from = startOfWeek(today, { weekStartsOn: 1 })
+        const to = endOfWeek(today, { weekStartsOn: 1 })
+        setRange({ from, to })
+      },
+    },
+    {
+      name: "다음 주",
+      run: () => {
+        const next = addWeeks(today, 1)
+        const from = startOfWeek(next, { weekStartsOn: 1 })
+        const to = endOfWeek(next, { weekStartsOn: 1 })
+        setRange({ from, to })
+      },
+    },
+    {
+      name: "이번 달",
+      run: () => {
+        const from = startOfMonth(today)
+        const to = endOfMonth(today)
+        setRange({ from, to })
+      },
+    },
+  ]
+
+  // Mock revenue data
+  const revenueData = {
+    totalRevenue: 1250000,
+    totalOrders: 45,
+    averageOrderValue: 27778,
+    dailyRevenue: [
+      { date: "2024-01-15", revenue: 150000, orders: 8 },
+      { date: "2024-01-16", revenue: 200000, orders: 12 },
+      { date: "2024-01-17", revenue: 180000, orders: 10 },
+      { date: "2024-01-18", revenue: 220000, orders: 15 },
+    ]
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+      <div className="flex">
+        <Sidebar />
+        
+        <main className="flex-1 p-6">
+          <div className="max-w-6xl mx-auto">
+            {/* Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">매출 관리</h1>
+              <p className="text-gray-600 mt-2">기간별 매출 현황을 확인하고 분석하세요</p>
+            </div>
+
+            {/* Period Selection Card */}
+            <Card className="mb-6">
+              <div className="p-6">
+                <div className="flex items-center justify-between gap-4 mb-6">
+                  <div>
+                    <h2 className="text-xl font-semibold">기간 설정</h2>
+                    <p className="text-slate-500 mt-1">매출을 확인할 기간을 선택하세요</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+                  <div className="sm:col-span-8">
+                    <div className="text-sm text-slate-500 mb-1">선택된 기간</div>
+                    <div className="text-lg font-medium">{label}</div>
+                  </div>
+                  <div className="sm:col-span-4 flex sm:justify-end gap-3">
+                    <Button
+                      onClick={() => setOpen(true)}
+                      variant="outline"
+                      className="inline-flex items-center gap-2"
+                    >
+                      <CalendarDays className="w-5 h-5" />
+                      기간 설정
+                    </Button>
+                    {range?.from && (
+                      <Button
+                        onClick={() => setRange(undefined)}
+                        variant="destructive"
+                        className="inline-flex items-center gap-2"
+                      >
+                        <X className="w-4 h-4" /> 초기화
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* 선택 요약 카드 */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="p-4">
+                    <div className="text-sm text-slate-500">시작일</div>
+                    <div className="text-lg font-semibold">{fmt(range?.from)}</div>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="text-sm text-slate-500">종료일</div>
+                    <div className="text-lg font-semibold">{fmt(range?.to)}</div>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="text-sm text-slate-500">일수</div>
+                    <div className="text-lg font-semibold">
+                      {range?.from && range?.to
+                        ? Math.ceil((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24)) + 1
+                        : "-"}
+                    </div>
+                  </Card>
+                </div>
+              </div>
+            </Card>
+
+            {/* Revenue Summary */}
+            {range?.from && range?.to && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <Card className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">총 매출</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {revenueData.totalRevenue.toLocaleString()}원
+                      </p>
+                    </div>
+                    <div className="p-3 bg-green-100 rounded-full">
+                      <DollarSign className="w-6 h-6 text-green-600" />
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">총 주문수</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {revenueData.totalOrders}건
+                      </p>
+                    </div>
+                    <div className="p-3 bg-blue-100 rounded-full">
+                      <ShoppingBag className="w-6 h-6 text-blue-600" />
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">평균 주문금액</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {revenueData.averageOrderValue.toLocaleString()}원
+                      </p>
+                    </div>
+                    <div className="p-3 bg-purple-100 rounded-full">
+                      <TrendingUp className="w-6 h-6 text-purple-600" />
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">일평균 매출</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {Math.round(revenueData.totalRevenue / 4).toLocaleString()}원
+                      </p>
+                    </div>
+                    <div className="p-3 bg-orange-100 rounded-full">
+                      <TrendingUp className="w-6 h-6 text-orange-600" />
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            )}
+
+            {/* Daily Revenue Chart */}
+            {range?.from && range?.to && (
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">일별 매출 현황</h3>
+                <div className="space-y-4">
+                  {revenueData.dailyRevenue.map((day, index) => (
+                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span className="font-medium">{day.date}</span>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <div className="text-sm text-gray-500">주문수</div>
+                          <div className="font-semibold">{day.orders}건</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-gray-500">매출</div>
+                          <div className="font-semibold text-green-600">
+                            {day.revenue.toLocaleString()}원
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Modal */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div
+              className="absolute inset-0 bg-black/30"
+              onClick={() => setOpen(false)}
+            />
+            <motion.div
+              className="relative z-10 w-[95%] max-w-3xl"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 20, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+            >
+              <Card className="p-0 overflow-hidden">
+                <div className="flex items-center justify-between px-6 py-4 border-b bg-white">
+                  <div className="flex items-center gap-2 text-lg font-semibold">
+                    <CalendarRange className="w-5 h-5" /> 기간 선택
+                  </div>
+                  <button
+                    className="p-2 rounded-xl hover:bg-slate-100"
+                    onClick={() => setOpen(false)}
+                    aria-label="닫기"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* Presets */}
+                  <div className="md:col-span-1">
+                    <div className="text-sm font-medium mb-2">빠른 선택</div>
+                    <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
+                      {presets.map((p) => (
+                        <button
+                          key={p.name}
+                          onClick={p.run}
+                          className="text-left rounded-xl border border-slate-200 px-3 py-2 hover:bg-slate-50"
+                        >
+                          {p.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Calendar */}
+                  <div className="md:col-span-3">
+                    <DayPicker
+                      locale={ko}
+                      mode="range"
+                      selected={range}
+                      onSelect={setRange}
+                      numberOfMonths={2}
+                      pagedNavigation
+                      weekStartsOn={1}
+                      captionLayout="dropdown"
+                      fromYear={2020}
+                      toYear={2032}
+                      className="mx-auto"
+                      styles={{
+                        caption: { fontWeight: 600 },
+                        day: { borderRadius: 10 },
+                      }}
+                    />
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-4">
+                      <div className="text-sm text-slate-600">
+                        선택: <span className="font-medium">{label}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => setRange(undefined)}
+                          variant="outline"
+                        >
+                          초기화
+                        </Button>
+                        <Button
+                          onClick={() => setOpen(false)}
+                          disabled={!range?.from}
+                          className="inline-flex items-center gap-2"
+                        >
+                          <Check className="w-4 h-4" /> 적용
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}

@@ -52,7 +52,7 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
       setSaving(true)
 
       if (menu) {
-        // Update existing menu (storeId 제외)
+        // Update existing menu
         await updateMenu(menu.id, {
           ...formData,
         })
