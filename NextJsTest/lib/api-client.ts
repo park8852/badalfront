@@ -213,9 +213,21 @@ export async function getMenusByStore(storeId: number): Promise<MenuItem[]> {
     throw new Error("Failed to fetch menus")
   }
 
-  const data = await response.json()
-  console.log("[v0] GET Menus Data:", data)
-  return data
+  const responseData = await response.json()
+  console.log("[v0] GET Menus Data:", responseData)
+
+  // 일부 API는 { data: [...] } 래핑 형태로 반환될 수 있으므로 안전하게 언래핑한다
+  const unwrapped =
+    responseData && typeof responseData === "object" && "data" in responseData
+      ? (responseData as { data: unknown }).data
+      : responseData
+
+  if (!Array.isArray(unwrapped)) {
+    console.error("[v0] GET Menus Unexpected Shape (expected array)", responseData)
+    return []
+  }
+
+  return unwrapped as MenuItem[]
 }
 
 export async function createMenu(data: CreateMenuRequest): Promise<MenuItem> {
