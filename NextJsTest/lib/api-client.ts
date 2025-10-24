@@ -333,9 +333,20 @@ export async function getOrdersByStore(storeId: number): Promise<Order[]> {
     throw new Error("Failed to fetch orders")
   }
 
-  const data = await response.json()
-  console.log("[v0] GET Orders Data:", data)
-  return data
+  const responseData = await response.json()
+  console.log("[v0] GET Orders Data:", responseData)
+
+  const unwrapped =
+    responseData && typeof responseData === "object" && "data" in responseData
+      ? (responseData as { data: unknown }).data
+      : responseData
+
+  if (!Array.isArray(unwrapped)) {
+    console.error("[v0] GET Orders Unexpected Shape (expected array)", responseData)
+    return []
+  }
+
+  return unwrapped as Order[]
 }
 
 export async function getOrderDetail(orderId: number): Promise<OrderDetail> {
