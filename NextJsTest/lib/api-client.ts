@@ -193,11 +193,17 @@ export async function updateStoreInfo(storeId: number, data: UpdateStoreRequest)
 
 // Menu API functions
 export async function getMenusByStore(storeId: number): Promise<MenuItem[]> {
+  const token = getAuthToken()
   const url = `${API_BASE_URL}/api/menu/store/${storeId}`
 
-  console.log("[v0] GET Menus Request:", { url })
+  console.log("[v0] GET Menus Request:", { url, token: token ? "present" : "missing" })
 
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
 
   console.log("[v0] GET Menus Response:", { status: response.status, ok: response.ok })
 
@@ -213,13 +219,15 @@ export async function getMenusByStore(storeId: number): Promise<MenuItem[]> {
 }
 
 export async function createMenu(data: CreateMenuRequest): Promise<MenuItem> {
+  const token = getAuthToken()
   const url = `${API_BASE_URL}/api/menu/create`
 
-  console.log("[v0] POST Create Menu Request:", { url, data })
+  console.log("[v0] POST Create Menu Request:", { url, token: token ? "present" : "missing", data })
 
   const response = await fetch(url, {
     method: "POST",
     headers: {
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
@@ -239,13 +247,15 @@ export async function createMenu(data: CreateMenuRequest): Promise<MenuItem> {
 }
 
 export async function updateMenu(menuId: number, data: UpdateMenuRequest): Promise<MenuItem> {
+  const token = getAuthToken()
   const url = `${API_BASE_URL}/api/menu/info/${menuId}`
 
-  console.log("[v0] PUT Update Menu Request:", { url, menuId, data })
+  console.log("[v0] PUT Update Menu Request:", { url, token: token ? "present" : "missing", menuId, data })
 
   const response = await fetch(url, {
     method: "PUT",
     headers: {
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
@@ -265,12 +275,17 @@ export async function updateMenu(menuId: number, data: UpdateMenuRequest): Promi
 }
 
 export async function deleteMenu(menuId: number): Promise<void> {
+  const token = getAuthToken()
   const url = `${API_BASE_URL}/api/menu/info/${menuId}`
 
-  console.log("[v0] DELETE Menu Request:", { url, menuId })
+  console.log("[v0] DELETE Menu Request:", { url, token: token ? "present" : "missing", menuId })
 
   const response = await fetch(url, {
     method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
   })
 
   console.log("[v0] DELETE Menu Response:", { status: response.status, ok: response.ok })
@@ -286,11 +301,17 @@ export async function deleteMenu(menuId: number): Promise<void> {
 
 // Order API functions
 export async function getOrdersByStore(storeId: number): Promise<Order[]> {
+  const token = getAuthToken()
   const url = `${API_BASE_URL}/api/order/store/${storeId}`
 
-  console.log("[v0] GET Orders Request:", { url })
+  console.log("[v0] GET Orders Request:", { url, token: token ? "present" : "missing" })
 
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
 
   console.log("[v0] GET Orders Response:", { status: response.status, ok: response.ok })
 
@@ -306,11 +327,17 @@ export async function getOrdersByStore(storeId: number): Promise<Order[]> {
 }
 
 export async function getOrderDetail(orderId: number): Promise<OrderDetail> {
+  const token = getAuthToken()
   const url = `${API_BASE_URL}/api/order/${orderId}`
 
-  console.log("[v0] GET Order Detail Request:", { url })
+  console.log("[v0] GET Order Detail Request:", { url, token: token ? "present" : "missing" })
 
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
 
   console.log("[v0] GET Order Detail Response:", { status: response.status, ok: response.ok })
 
