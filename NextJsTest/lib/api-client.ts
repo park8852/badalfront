@@ -78,28 +78,36 @@ export interface UpdateMenuRequest {
 // Order API types
 export interface Order {
     id: number
-    storeid: number
-    menuid: number
-    menu_name: string
-    thumbnail: string
+    memberId: number
+    storeId: number
+    menuId: number
     quantity: number
-    total_price: number
-    created_at: string
+    totalPrice: number
+    createdAt: string
+    customerName: string
+    customerPhone: string
+    customerAddress: string
+    storeName: string
+    storeAddress: string
+    menuTitle: string
+    paymentMethod: string
 }
 
 export interface OrderDetail {
     id: number
-    storeid: number
-    menuid: number
+    memberId: number
+    storeId: number
+    menuId: number
     quantity: number
-    total_price: number
-    created_at: string
-    menu: {
-        id: number
-        name: string
-        price: number
-        thumbnail: string
-    }
+    totalPrice: number
+    createdAt: string
+    customerName: string
+    customerPhone: string
+    customerAddress: string
+    storeName: string
+    storeAddress: string
+    menuTitle: string
+    paymentMethod: string
 }
 
 // Store API functions
@@ -403,7 +411,10 @@ export async function getOrderDetail(orderId: number): Promise<OrderDetail> {
     throw new Error("Failed to fetch order detail")
   }
 
-    const data = await response.json()
-    console.log("[v0] GET Order Detail Data:", data)
-    return data
+    const responseData = await response.json()
+    console.log("[v0] GET Order Detail Data:", responseData)
+    
+    // API 응답에서 data 필드만 추출하여 반환
+    const unwrapped = responseData && typeof responseData === "object" && "data" in responseData ? responseData.data : responseData
+    return unwrapped as OrderDetail
 }

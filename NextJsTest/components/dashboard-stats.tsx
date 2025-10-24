@@ -15,13 +15,13 @@ export function DashboardStats() {
 
   const todayOrders =
     orders?.filter((order) => {
-      const orderDate = new Date(order.created_at)
+      const orderDate = new Date(order.createdAt)
       orderDate.setHours(0, 0, 0, 0)
       return orderDate.getTime() === today.getTime()
     }) || []
 
   const todayOrderCount = todayOrders.length
-  const todayRevenue = todayOrders.reduce((sum, order) => sum + order.total_price, 0)
+  const todayRevenue = todayOrders.reduce((sum, order) => sum + order.totalPrice, 0)
 
   const stats = [
     {

@@ -60,8 +60,8 @@ export function OrderList() {
               <div className="flex items-center gap-4 flex-1">
                 <div className="h-16 w-16 rounded-md bg-muted overflow-hidden flex-shrink-0">
                   <img
-                    src={order.thumbnail || "/placeholder.svg"}
-                    alt={order.menu_name}
+                    src="/placeholder.svg"
+                    alt={order.menuTitle}
                     className="h-full w-full object-cover"
                   />
                 </div>
@@ -69,16 +69,18 @@ export function OrderList() {
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-sm font-medium">주문 #{order.id}</span>
-                    <span className="text-sm text-muted-foreground">{getTimeAgo(order.created_at)}</span>
+                    <span className="text-sm text-muted-foreground">{getTimeAgo(order.createdAt)}</span>
                   </div>
-                  <p className="font-medium">{order.menu_name}</p>
+                  <p className="font-medium">{order.menuTitle}</p>
                   <p className="text-sm text-muted-foreground">수량: {order.quantity}개</p>
+                  <p className="text-sm text-muted-foreground">고객: {order.customerName}</p>
+                  <p className="text-sm text-muted-foreground">결제: {order.paymentMethod}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <p className="text-lg font-bold">{Number(order.total_price ?? 0).toLocaleString()}원</p>
+                  <p className="text-lg font-bold">{Number(order.totalPrice ?? 0).toLocaleString()}원</p>
                 </div>
                 <Link href={`/orders/${order.id}`}>
                   <Button variant="outline" size="sm">
