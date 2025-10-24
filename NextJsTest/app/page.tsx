@@ -16,7 +16,10 @@ export default function MobileAppPage() {
     const auth = getAuthInfo()
     setAuthInfo(auth)
     setIsLoading(false)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 384d037fe9fd40544491d60383fd24449ecfeacc
   }, [])
 
   const handleGoBack = () => {
