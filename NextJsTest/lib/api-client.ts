@@ -68,7 +68,6 @@ export interface CreateMenuRequest {
 }
 
 export interface UpdateMenuRequest {
-  storeId: number
   title: string
   content: string
   price: number
