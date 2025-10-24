@@ -307,31 +307,44 @@ export async function updateMenu(menuId: number, data: UpdateMenuRequest): Promi
 
 export async function deleteMenu(menuId: number): Promise<void> {
     const token = getAuthToken()
-    const url = `${API_BASE_URL}/api/menu/info/${menuId}`
+    const url = `${API_BASE_URL}/api/menu/delete/${menuId}`
 
-    console.log("[v0] DELETE Menu Request:", { url, token: token ? "present" : "missing", menuId })
+    console.log("[v0] GET Delete Menu Request:", { url, token: token ? "present" : "missing", menuId })
 
     const response = await fetch(url, {
-        method: "DELETE",
+        // Backend spec requires GET for deletion
+        method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
         },
     })
 
-    console.log("[v0] DELETE Menu Response:", { status: response.status, ok: response.ok })
+    console.log("[v0] GET Delete Menu Response:", { status: response.status, ok: response.ok })
 
-  if (!response.ok) {
-    // 401 에러 시 자동 로그아웃 및 리다이렉션
-    if (handleAuthError(response)) {
-      return
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return
+        }
+        const errorText = await response.text()
+        console.error("[v0] GET Delete Menu Error:", errorText)
+        throw new Error("Failed to delete menu")
     }
-    const errorText = await response.text()
-    console.error("[v0] DELETE Menu Error:", errorText)
-    throw new Error("Failed to delete menu")
-  }
 
-    console.log("[v0] DELETE Menu Success")
+    // Handle response shape: { responseType, data, message }
+    try {
+        const body = await response.json()
+        const responseType = body?.responseType
+        if (responseType && responseType !== "SUCCESS") {
+            const message = body?.message ?? "Delete failed"
+            throw new Error(message)
+        }
+        console.log("[v0] GET Delete Menu Success:", body?.message ?? "메뉴 삭제 완료")
+    } catch (e) {
+        // Some APIs may return empty body on success; treat as success
+        console.log("[v0] GET Delete Menu: no JSON body, assuming success")
+    }
 }
 
 // Order API functions
