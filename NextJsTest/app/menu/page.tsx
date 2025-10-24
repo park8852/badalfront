@@ -83,9 +83,9 @@ export default function MenuManagementPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6 lg:p-8">
+      <main className="lg:ml-64 p-6 lg:p-8 transition-all duration-300" id="main-content">
         <div className="mx-auto max-w-7xl space-y-6">
           <div className="flex items-center justify-between">
             <div>

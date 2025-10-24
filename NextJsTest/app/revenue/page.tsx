@@ -85,10 +85,8 @@ export default function RevenuePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
-      <div className="flex">
-        <Sidebar />
-        
-        <main className="flex-1 p-6">
+      <Sidebar />
+      <main className="lg:ml-64 p-6 transition-all duration-300" id="main-content">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="mb-8">
@@ -244,8 +242,7 @@ export default function RevenuePage() {
               </Card>
             )}
           </div>
-        </main>
-      </div>
+      </main>
 
       {/* Modal */}
       <AnimatePresence>

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { memberService } from "@/lib/member-service"
 import { setAuthInfo } from "@/lib/auth-utils"
@@ -89,7 +90,7 @@ const LoginPage = ({ onPageChange, onLoginSuccess }: LoginPageProps) => {
     <div className="bg-[#0571e133] w-full min-h-screen flex items-center justify-center">
       <div className="w-full max-w-[1200px] h-[600px] flex rounded-[24px] overflow-hidden shadow-2xl">
         {/* 왼쪽 패널 - 브랜딩 영역 */}
-        <div className="w-1/2 h-full bg-gradient-to-br from-[#0066cc] to-[#003d7a] flex flex-col items-center justify-center relative overflow-hidden">
+        <div className="w-1/2 h-full bg-gradient-to-br from-[#1e40af] to-[#1e3a8a] flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <svg className="absolute bottom-0 left-0 w-[300px] h-[300px]" viewBox="0 0 400 400">
               <circle cx="100" cy="300" r="200" fill="none" stroke="white" strokeWidth="2" />
@@ -98,7 +99,15 @@ const LoginPage = ({ onPageChange, onLoginSuccess }: LoginPageProps) => {
             </svg>
           </div>
           <div className="relative z-10 text-center px-12">
-            <h1 className="text-white text-[48px] font-bold leading-tight mb-4">바로배달</h1>
+            <div className="flex justify-center mb-4">
+              <Image 
+                src="/logo_white.png" 
+                alt="바로배달 로고" 
+                width={200} 
+                height={60}
+                className="h-30 w-auto"
+              />
+            </div>
             <p className="text-white text-[18px] leading-relaxed mb-8">가장 빠르고 안전한 배달 서비스</p>
             <button
               onClick={() => onPageChange("home")}

@@ -67,9 +67,54 @@ export function getAuthHeaders(): Record<string, string> {
 export function handleAuthError(response: Response): boolean {
   if (response.status === 401) {
     clearAuthInfo()
-    // 토큰 만료 시 로그인 페이지로 리다이렉션
+    // 토큰 만료 시 알림 표시 후 로그인 페이지로 리다이렉션
     if (typeof window !== "undefined") {
-      window.location.href = "/login"
+      // 사용자에게 토큰 만료 알림 표시
+      const showExpiredMessage = () => {
+        // 커스텀 알림 메시지 생성
+        const notification = document.createElement('div')
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #dc2626;
+          color: white;
+          padding: 16px 20px;
+          border-radius: 8px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+          z-index: 9999;
+          font-family: system-ui, -apple-system, sans-serif;
+          max-width: 400px;
+          animation: slideIn 0.3s ease-out;
+        `
+        notification.innerHTML = `
+          <div style="font-weight: 600; margin-bottom: 4px;">세션 만료</div>
+          <div style="font-size: 14px; opacity: 0.9;">세션이 만료되었습니다. 다시 로그인해주세요.</div>
+        `
+        
+        // CSS 애니메이션 추가
+        const style = document.createElement('style')
+        style.textContent = `
+          @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+          }
+        `
+        document.head.appendChild(style)
+        document.body.appendChild(notification)
+        
+        // 3초 후 알림 제거 및 리다이렉션
+        setTimeout(() => {
+          notification.style.animation = 'slideIn 0.3s ease-out reverse'
+          setTimeout(() => {
+            document.body.removeChild(notification)
+            document.head.removeChild(style)
+            window.location.href = "/login"
+          }, 300)
+        }, 3000)
+      }
+      
+      showExpiredMessage()
     }
     return true
   }

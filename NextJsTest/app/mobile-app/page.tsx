@@ -80,7 +80,7 @@ export default function MobileAppPage() {
       <main className="relative z-10 mx-auto max-w-4xl px-4 py-8 mr-8">
         <div className="text-center mb-12 mr-8">
           <Image 
-            src="/logo_black.png" 
+            src="/logo_black_in"
             alt="바로배달 로고" 
             width={700} 
             height={100}
