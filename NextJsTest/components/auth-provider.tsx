@@ -23,12 +23,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const auth = getAuthInfo()
       const hasStore = typeof auth?.storeId === "number"
 
-      // 이미 로그인된 상태에서 접근 제어
-      if (pathname === "/login" || pathname === "/register") {
-        router.push(hasStore ? "/dashboard" : "/store/create")
-        return
-      }
-
       // 스토어 없는 사용자는 대시보드/메뉴/주문/스토어관리 페이지 접근 시 생성 페이지로
       const protectedNeedsStore = ["/dashboard", "/menu", "/orders", "/store"]
       if (!hasStore && protectedNeedsStore.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
