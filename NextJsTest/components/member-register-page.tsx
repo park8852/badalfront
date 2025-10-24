@@ -242,11 +242,7 @@ interface FormData {
 }
 
 export default function MemberRegisterPage() {
-<<<<<<< HEAD
     const router = useRouter()
-=======
-  const router = useRouter()
->>>>>>> 384d037fe9fd40544491d60383fd24449ecfeacc
   const [form, setForm] = useState<FormData>({
     userid: "",
     userpw: "",
@@ -403,13 +399,8 @@ export default function MemberRegisterPage() {
         message: data.message || "회원가입이 완료되었습니다.",
         data: data.data,
       })
-<<<<<<< HEAD
         // 회원가입 성공 후 로그인 페이지로 이동
         router.push("/login")
-=======
-      // 회원가입 성공 후 로그인 페이지로 이동
-      router.push("/login")
->>>>>>> 384d037fe9fd40544491d60383fd24449ecfeacc
     } catch (err: any) {
       setResult({
         type: "FAIL",
