@@ -2,17 +2,10 @@
 
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { isAuthenticated } from "@/lib/auth-utils"
-import { useEffect } from "react"
+ 
 
 export default function HomePage() {
   const router = useRouter()
-
-  useEffect(() => {
-    if (isAuthenticated()) {
-      router.push("/dashboard")
-    }
-  }, [router])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
