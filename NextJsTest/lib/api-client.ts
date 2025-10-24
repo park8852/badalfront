@@ -68,7 +68,6 @@ export interface CreateMenuRequest {
 }
 
 export interface UpdateMenuRequest {
-  storeId: number
   title: string
   content: string
   price: number
@@ -213,9 +212,21 @@ export async function getMenusByStore(storeId: number): Promise<MenuItem[]> {
     throw new Error("Failed to fetch menus")
   }
 
-  const data = await response.json()
-  console.log("[v0] GET Menus Data:", data)
-  return data
+  const responseData = await response.json()
+  console.log("[v0] GET Menus Data:", responseData)
+
+  // 일부 API는 { data: [...] } 래핑 형태로 반환될 수 있으므로 안전하게 언래핑한다
+  const unwrapped =
+    responseData && typeof responseData === "object" && "data" in responseData
+      ? (responseData as { data: unknown }).data
+      : responseData
+
+  if (!Array.isArray(unwrapped)) {
+    console.error("[v0] GET Menus Unexpected Shape (expected array)", responseData)
+    return []
+  }
+
+  return unwrapped as MenuItem[]
 }
 
 export async function createMenu(data: CreateMenuRequest): Promise<MenuItem> {
@@ -246,14 +257,14 @@ export async function createMenu(data: CreateMenuRequest): Promise<MenuItem> {
   return responseData
 }
 
-export async function updateMenu(menuId: number, data: UpdateMenuRequest): Promise<MenuItem> {
+export async function updateMenu(menuId: number, data: UpdateMenuRequest): Promise<void> {
   const token = getAuthToken()
   const url = `${API_BASE_URL}/api/menu/info/${menuId}`
 
-  console.log("[v0] PUT Update Menu Request:", { url, token: token ? "present" : "missing", menuId, data })
+  console.log("[v0] POST Update Menu Request:", { url, token: token ? "present" : "missing", menuId, data })
 
   const response = await fetch(url, {
-    method: "PUT",
+    method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -261,17 +272,17 @@ export async function updateMenu(menuId: number, data: UpdateMenuRequest): Promi
     body: JSON.stringify(data),
   })
 
-  console.log("[v0] PUT Update Menu Response:", { status: response.status, ok: response.ok })
+  console.log("[v0] POST Update Menu Response:", { status: response.status, ok: response.ok })
 
   if (!response.ok) {
     const errorText = await response.text()
-    console.error("[v0] PUT Update Menu Error:", errorText)
+    console.error("[v0] POST Update Menu Error:", errorText)
     throw new Error("Failed to update menu")
   }
 
   const responseData = await response.json()
-  console.log("[v0] PUT Update Menu Data:", responseData)
-  return responseData
+  console.log("[v0] POST Update Menu Data:", responseData)
+  // API는 { responseType, data: null, message } 형태를 반환 -> 별도 반환값 없음
 }
 
 export async function deleteMenu(menuId: number): Promise<void> {
@@ -321,9 +332,20 @@ export async function getOrdersByStore(storeId: number): Promise<Order[]> {
     throw new Error("Failed to fetch orders")
   }
 
-  const data = await response.json()
-  console.log("[v0] GET Orders Data:", data)
-  return data
+  const responseData = await response.json()
+  console.log("[v0] GET Orders Data:", responseData)
+
+  const unwrapped =
+    responseData && typeof responseData === "object" && "data" in responseData
+      ? (responseData as { data: unknown }).data
+      : responseData
+
+  if (!Array.isArray(unwrapped)) {
+    console.error("[v0] GET Orders Unexpected Shape (expected array)", responseData)
+    return []
+  }
+
+  return unwrapped as Order[]
 }
 
 export async function getOrderDetail(orderId: number): Promise<OrderDetail> {
