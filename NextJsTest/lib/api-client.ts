@@ -301,11 +301,17 @@ export async function deleteMenu(menuId: number): Promise<void> {
 
 // Order API functions
 export async function getOrdersByStore(storeId: number): Promise<Order[]> {
+  const token = getAuthToken()
   const url = `${API_BASE_URL}/api/order/store/${storeId}`
 
-  console.log("[v0] GET Orders Request:", { url })
+  console.log("[v0] GET Orders Request:", { url, token: token ? "present" : "missing" })
 
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
 
   console.log("[v0] GET Orders Response:", { status: response.status, ok: response.ok })
 
@@ -321,11 +327,17 @@ export async function getOrdersByStore(storeId: number): Promise<Order[]> {
 }
 
 export async function getOrderDetail(orderId: number): Promise<OrderDetail> {
+  const token = getAuthToken()
   const url = `${API_BASE_URL}/api/order/${orderId}`
 
-  console.log("[v0] GET Order Detail Request:", { url })
+  console.log("[v0] GET Order Detail Request:", { url, token: token ? "present" : "missing" })
 
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
 
   console.log("[v0] GET Order Detail Response:", { status: response.status, ok: response.ok })
 
