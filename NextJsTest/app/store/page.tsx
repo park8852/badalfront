@@ -11,8 +11,10 @@ import { useEffect, useState } from "react"
 import { getStoreInfo, updateStoreInfo, type StoreInfo } from "@/lib/api-client"
 import { Loader2, Upload, X, Clock, CheckCircle, XCircle } from "lucide-react"
 import { Sidebar } from "@/components/sidebar"
+import { BusinessStatusDisplay } from "@/components/business-status-display"
 import Image from "next/image"
 import { getAuthInfo } from "@/lib/auth-utils"
+import useSWR from "swr"
 
 export default function StoreManagementPage() {
   const [loading, setLoading] = useState(true)
@@ -32,44 +34,6 @@ export default function StoreManagementPage() {
   })
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string>("")
-
-  // 영업 상태 확인 함수
-  const isStoreOpen = () => {
-    if (!storeData) return false
-    
-    const now = new Date()
-    const currentHour = now.getHours()
-    const currentMinute = now.getMinutes()
-    const currentTime = currentHour * 60 + currentMinute
-    
-    const openTime = storeData.openH * 60 + storeData.openM
-    const closeTime = storeData.closedH * 60 + storeData.closedM
-    
-    return currentTime >= openTime && currentTime <= closeTime
-  }
-
-  // 영업 상태 텍스트
-  const getBusinessStatusText = () => {
-    if (!storeData) return "정보 없음"
-    
-    const now = new Date()
-    const currentHour = now.getHours()
-    const currentMinute = now.getMinutes()
-    const currentTime = currentHour * 60 + currentMinute
-    
-    const openTime = storeData.openH * 60 + storeData.openM
-    const closeTime = storeData.closedH * 60 + storeData.closedM
-    
-    if (currentTime >= openTime && currentTime <= closeTime) {
-      return "영업중"
-    } else if (currentTime < openTime) {
-      const hoursUntilOpen = Math.ceil((openTime - currentTime) / 60)
-      return `${hoursUntilOpen}시간 후 영업 시작`
-    } else {
-      const hoursUntilOpen = Math.ceil((24 * 60 - currentTime + openTime) / 60)
-      return `${hoursUntilOpen}시간 후 영업 시작`
-    }
-  }
 
   const defaultCategories = [
     "한식",
@@ -210,28 +174,7 @@ export default function StoreManagementPage() {
               <h1 className="text-3xl font-bold tracking-tight text-balance">가게 관리</h1>
               <p className="mt-2 text-muted-foreground">가게 정보와 운영 설정을 관리하세요</p>
             </div>
-            {storeData && (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {storeData.openH.toString().padStart(2, '0')}:{storeData.openM.toString().padStart(2, '0')} - {storeData.closedH.toString().padStart(2, '0')}:{storeData.closedM.toString().padStart(2, '0')}
-                  </span>
-                </div>
-                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
-                  isStoreOpen() 
-                    ? 'bg-green-100 text-green-700 border border-green-200' 
-                    : 'bg-red-100 text-red-700 border border-red-200'
-                }`}>
-                  {isStoreOpen() ? (
-                    <CheckCircle className="w-4 h-4" />
-                  ) : (
-                    <XCircle className="w-4 h-4" />
-                  )}
-                  <span className="text-sm font-medium">{getBusinessStatusText()}</span>
-                </div>
-              </div>
-            )}
+            <BusinessStatusDisplay />
           </div>
 
           <form onSubmit={handleSubmit}>

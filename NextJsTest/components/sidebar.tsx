@@ -5,7 +5,7 @@ import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
-import { ShoppingCart, Store, UtensilsCrossed, LogOut, ChevronLeft, ChevronRight, User, TrendingUp } from "lucide-react"
+import { ShoppingCart, Store, UtensilsCrossed, LogOut, ChevronLeft, ChevronRight, User, TrendingUp, Shield, Megaphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { clearAuthInfo, getAuthInfo } from "@/lib/auth-utils"
 
@@ -87,7 +87,9 @@ export function Sidebar() {
                   height={100}
                   className="h-14 w-auto"
                 />
-                <p className="mt-1 text-sm text-sidebar-foreground/70">사장님 대시보드</p>
+                <p className="mt-1 text-sm text-sidebar-foreground/70">
+                  {isClient && authInfo?.role === "ADMIN" ? "관리자 대시보드" : "사장님 대시보드"}
+                </p>
               </div>
             )}
             <Button
@@ -137,6 +139,44 @@ export function Sidebar() {
               </Link>
             )
           })}
+          
+          {/* 공지사항 링크 (모든 사용자에게 표시) */}
+          <Link
+            href="/notices"
+            className={cn(
+              "flex items-center rounded-lg px-4 py-3 text-sm font-medium transition-colors",
+              pathname === "/notices"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+              isCollapsed ? "justify-center" : "justify-start"
+            )}
+            title={isCollapsed ? "공지사항" : undefined}
+          >
+            <span className="inline-flex h-5 w-5 items-center justify-center shrink-0">
+              <Megaphone className="h-5 w-5" />
+            </span>
+            {!isCollapsed && <span className="ml-3">공지사항</span>}
+          </Link>
+
+          {/* 관리자 페이지 링크 (ADMIN 역할일 때만 표시) */}
+          {isClient && authInfo?.role === "ADMIN" && (
+            <Link
+              href="/admin"
+              className={cn(
+                "flex items-center rounded-lg px-4 py-3 text-sm font-medium transition-colors",
+                pathname === "/admin"
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                isCollapsed ? "justify-center" : "justify-start"
+              )}
+              title={isCollapsed ? "관리자 페이지" : undefined}
+            >
+              <span className="inline-flex h-5 w-5 items-center justify-center shrink-0">
+                <Shield className="h-5 w-5" />
+              </span>
+              {!isCollapsed && <span className="ml-3">관리자 페이지</span>}
+            </Link>
+          )}
         </nav>
 
         {/* 사용자 정보 및 마이페이지 */}
@@ -157,7 +197,9 @@ export function Sidebar() {
               {!isCollapsed && (
                 <div>
                   <p className="text-sm font-medium text-sidebar-foreground">{authInfo.userId}</p>
-                  <p className="text-xs text-sidebar-foreground/70">사장님</p>
+                  <p className="text-xs text-sidebar-foreground/70">
+                    {authInfo.role === "ADMIN" ? "관리자" : "사장님"}
+                  </p>
                 </div>
               )}
             </div>

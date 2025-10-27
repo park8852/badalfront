@@ -9,6 +9,7 @@ import useSWR from "swr"
 import { getOrdersByStore, getOrderDetail, Order } from "@/lib/api-client"
 import { useState, useEffect } from "react"
 import { getAuthInfo } from "@/lib/auth-utils"
+import { SWR_KEYS } from "@/lib/swr-keys"
 
 function getTimeAgo(dateString: string) {
   const now = new Date()
@@ -31,7 +32,7 @@ export default function DashboardPage() {
     error: ordersError,
     isLoading: ordersLoading,
     mutate: mutateOrders,
-  } = useSWR(storeId ? `orders-${storeId}` : null, () => getOrdersByStore(storeId as number))
+  } = useSWR(storeId ? SWR_KEYS.STORE_ORDERS(storeId) : null, () => getOrdersByStore(storeId as number))
 
   // 선택된 주문 상세 정보 가져오기
   const {
@@ -39,7 +40,7 @@ export default function DashboardPage() {
     error: detailError,
     isLoading: detailLoading,
     mutate: mutateOrderDetail,
-  } = useSWR(selectedOrderId ? `order-${selectedOrderId}` : null, () =>
+  } = useSWR(selectedOrderId ? SWR_KEYS.ORDER_DETAIL(selectedOrderId) : null, () =>
     selectedOrderId ? getOrderDetail(selectedOrderId) : null
   )
 

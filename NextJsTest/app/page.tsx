@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { getAuthInfo, clearAuthInfo } from "@/lib/auth-utils"
-import { Smartphone, Download, QrCode, ArrowLeft, CheckCircle } from "lucide-react"
+import { getAuthInfo } from "@/lib/auth-utils"
+import { Download, QrCode, CheckCircle, Store } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 
-export default function MobileAppPage() {
+export default function HomePage() {
   const router = useRouter()
   const [authInfo, setAuthInfo] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -16,12 +16,9 @@ export default function MobileAppPage() {
     const auth = getAuthInfo()
     setAuthInfo(auth)
     setIsLoading(false)
-
   }, [])
 
-  const handleGoBack = () => {
-    // 로그아웃 + 로그인 페이지로 이동
-    clearAuthInfo()
+  const handleOwnerLogin = () => {
     router.push("/login")
   }
 
@@ -60,11 +57,11 @@ export default function MobileAppPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleGoBack}
+              onClick={handleOwnerLogin}
               className="flex items-center gap-2 text-slate-600 hover:text-slate-900"
             >
-              <ArrowLeft className="h-4 w-4" />
-              사장님 계정으로 다시 로그인하기
+              <Store className="h-4 w-4" />
+              사장님 계정으로 로그인하기
             </Button>
           </div>
           
@@ -72,7 +69,7 @@ export default function MobileAppPage() {
             <Button
               size="lg"
               onClick={() => router.push("/register")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+              className="bg-green-600 hover:bg-green-700 text-white px-6"
             >
               회원가입
             </Button>

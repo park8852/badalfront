@@ -222,6 +222,110 @@ export async function createStore(data: CreateStoreRequest, file?: File): Promis
     console.log("[v0] POST Create Store Data:", unwrapped)
     return unwrapped as StoreInfo
 }
+// 모든 주문 조회 API (관리자용)
+export async function getAllOrders(): Promise<Order[]> {
+    const token = getAuthToken()
+    const url = `${API_BASE_URL}/api/order/list`
+
+    console.log("[v0] GET All Orders Request:", { url, token: token ? "present" : "missing" })
+
+    const response = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+    })
+
+    console.log("[v0] GET All Orders Response:", { status: response.status, ok: response.ok })
+
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return []
+        }
+        const errorText = await response.text()
+        console.error("[v0] GET All Orders Error:", errorText)
+        throw new Error("Failed to fetch all orders")
+    }
+
+    const responseData = await response.json()
+    console.log("[v0] GET All Orders Data:", responseData)
+
+    // API 응답 구조에 따라 데이터 추출
+    if (responseData.responseType === "SUCCESS" && responseData.data) {
+        return responseData.data as Order[]
+    }
+
+    return []
+}
+
+// 상점 삭제 API (관리자용)
+export async function deleteStore(storeId: number): Promise<void> {
+    const token = getAuthToken()
+    const url = `${API_BASE_URL}/api/store/delete/${storeId}`
+
+    console.log("[v0] DELETE Store Request:", { url, token: token ? "present" : "missing", storeId })
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+    })
+
+    console.log("[v0] DELETE Store Response:", { status: response.status, ok: response.ok })
+
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return
+        }
+        const errorText = await response.text()
+        console.error("[v0] DELETE Store Error:", errorText)
+        throw new Error("Failed to delete store")
+    }
+
+    console.log("[v0] DELETE Store Success")
+}
+
+// 모든 가게 조회 API (관리자용)
+export async function getAllStores(): Promise<StoreInfo[]> {
+    const token = getAuthToken()
+    const url = `${API_BASE_URL}/api/store/all`
+
+    console.log("[v0] GET All Stores Request:", { url, token: token ? "present" : "missing" })
+
+    const response = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+    })
+
+    console.log("[v0] GET All Stores Response:", { status: response.status, ok: response.ok })
+
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return []
+        }
+        const errorText = await response.text()
+        console.error("[v0] GET All Stores Error:", errorText)
+        throw new Error("Failed to fetch all stores")
+    }
+
+    const responseData = await response.json()
+    console.log("[v0] GET All Stores Data:", responseData)
+
+    // API 응답 구조에 따라 데이터 추출
+    if (responseData.responseType === "SUCCESS" && responseData.data) {
+        return responseData.data as StoreInfo[]
+    }
+
+    return []
+}
+
 export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
     const token = getAuthToken()
     const url = `${API_BASE_URL}/api/store/info/${storeId}`

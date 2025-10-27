@@ -69,7 +69,10 @@ const LoginPage = ({ onPageChange, onLoginSuccess }: LoginPageProps) => {
           // 역할에 따른 리다이렉트
           if (userRole === "USER") {
             console.log('USER 역할로 로그인 - 모바일 앱 페이지로 이동')
-            router.replace("/mobile-app")
+            router.replace("/")
+          } else if (userRole === "ADMIN") {
+            console.log('ADMIN 역할로 로그인 - 관리자 페이지로 이동')
+            router.replace("/admin")
           } else {
             console.log('OWNER 역할로 로그인 - 대시보드로 이동')
             if (onLoginSuccess) onLoginSuccess()
@@ -152,7 +155,8 @@ const LoginPage = ({ onPageChange, onLoginSuccess }: LoginPageProps) => {
                   value={formData.userid}
                   onChange={handleChange}
                   name="userid"
-                  className="w-full bg-white border border-[#e0e0e0] rounded-[12px] px-12 py-4 text-[16px] text-[#1a1a1a] placeholder-[#999999] focus:outline-none focus:border-[#0088ff] transition-colors"
+                  disabled={isLoading}
+                  className="w-full bg-white border border-[#e0e0e0] rounded-[12px] px-12 py-4 text-[16px] text-[#1a1a1a] placeholder-[#999999] focus:outline-none focus:border-[#0088ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   required
                   aria-label="아이디"
                 />
@@ -183,7 +187,8 @@ const LoginPage = ({ onPageChange, onLoginSuccess }: LoginPageProps) => {
                   value={formData.userpw}
                   onChange={handleChange}
                   name="userpw"
-                  className="w-full bg-white border border-[#e0e0e0] rounded-[12px] px-12 py-4 text-[16px] text-[#1a1a1a] placeholder-[#999999] focus:outline-none focus:border-[#0088ff] transition-colors"
+                  disabled={isLoading}
+                  className="w-full bg-white border border-[#e0e0e0] rounded-[12px] px-12 py-4 text-[16px] text-[#1a1a1a] placeholder-[#999999] focus:outline-none focus:border-[#0088ff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   required
                   aria-label="비밀번호"
                 />
@@ -196,12 +201,12 @@ const LoginPage = ({ onPageChange, onLoginSuccess }: LoginPageProps) => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-[#0088ff] hover:bg-[#0077ee] text-white rounded-[12px] py-4 text-[16px] font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#0088ff] hover:bg-[#0077ee] disabled:bg-[#0088ff]/60 text-white rounded-[12px] py-4 text-[16px] font-semibold transition-all duration-200 disabled:cursor-not-allowed relative"
               >
                 {isLoading ? (
-                  <div className="flex items-center justify-center">
+                  <div className="flex items-center justify-center gap-3">
                     <svg
-                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      className="animate-spin h-5 w-5 text-white"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -220,7 +225,7 @@ const LoginPage = ({ onPageChange, onLoginSuccess }: LoginPageProps) => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                    로그인 중...
+                    <span>로그인 중...</span>
                   </div>
                 ) : (
                   "로그인"
