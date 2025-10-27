@@ -28,7 +28,7 @@ export default function StoreManagementPage() {
     openM: 0,
     closedH: 21,
     closedM: 0,
-    logo: "",
+    thumbnail: "",
   })
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string>("")
@@ -117,9 +117,9 @@ export default function StoreManagementPage() {
         openM: data.openM,
         closedH: data.closedH,
         closedM: data.closedM,
-        logo: data.logo || "",
+        thumbnail: data.thumbnail || "",
       })
-      setLogoPreview(data.logo || "")
+      setLogoPreview(data.thumbnail || "")
     } catch (error) {
       console.error("Failed to load store info:", error)
     } finally {
@@ -142,7 +142,7 @@ export default function StoreManagementPage() {
   const handleRemoveLogo = () => {
     setLogoFile(null)
     setLogoPreview("")
-    setFormData({ ...formData, logo: "" })
+    setFormData({ ...formData, thumbnail: "" })
   }
 
   const handleEdit = () => {
@@ -162,9 +162,9 @@ export default function StoreManagementPage() {
         openM: storeData.openM,
         closedH: storeData.closedH,
         closedM: storeData.closedM,
-        logo: storeData.logo || "",
+        thumbnail: storeData.thumbnail || "",
       })
-      setLogoPreview(storeData.logo || "")
+      setLogoPreview(storeData.thumbnail || "")
     }
   }
 
@@ -179,7 +179,7 @@ export default function StoreManagementPage() {
     try {
       setSaving(true)
       // logo 필드를 제외하고 API 요청
-      const { logo, ...updateData } = formData
+      const { thumbnail, ...updateData } = formData
       await updateStoreInfo(storeId, updateData, logoFile || undefined)
       alert("가게 정보가 저장되었습니다.")
       await loadStoreInfo()

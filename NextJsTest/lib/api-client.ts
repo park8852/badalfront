@@ -250,8 +250,14 @@ export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
     const responseData = await response.json()
     console.log("[v0] GET Store Info Data:", responseData)
 
-    // thumbnail 필드는 그대로 사용 (매핑 불필요)
-    return responseData.data
+    const storeInfo = responseData.data
+    
+    // 상대 경로를 전체 URL로 변환
+    if (storeInfo.thumbnail && !storeInfo.thumbnail.startsWith('http')) {
+        storeInfo.thumbnail = `${API_BASE_URL}/${storeInfo.thumbnail}`
+    }
+
+    return storeInfo
 }
 
 export async function updateStoreInfo(storeId: number, data: UpdateStoreRequest, file?: File): Promise<StoreInfo> {
