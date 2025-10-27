@@ -413,6 +413,7 @@ export async function getOrderDetail(orderId: number): Promise<OrderDetail> {
 
     const responseData = await response.json()
     console.log("[v0] GET Order Detail Data:", responseData)
+<<<<<<< HEAD
 
     // API 응답에서 data 필드만 추출하여 반환
     const unwrapped = responseData && typeof responseData === "object" && "data" in responseData ? responseData.data : responseData
@@ -478,4 +479,10 @@ export async function getOrdersByPeriod(data: OrderPeriodRequest): Promise<Order
     }
 
     return []
+=======
+    
+    // API 응답에서 data 필드만 추출하여 반환
+    const unwrapped = responseData && typeof responseData === "object" && "data" in responseData ? responseData.data : responseData
+    return unwrapped as OrderDetail
+>>>>>>> 2d2f45b1f70543c7fdf48cfbe10a1012d93232e2
 }
