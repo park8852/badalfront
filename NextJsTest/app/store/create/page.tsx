@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Store, Clock, Phone, MapPin, Upload, X, LogOut, LogIn } from "lucide-react"
-import { createStore, type CreateStoreRequest } from "@/lib/api-client"
+import { createStore, uploadFile, type CreateStoreRequest } from "@/lib/api-client"
 import { getAuthInfo, setAuthInfo, clearAuthInfo } from "@/lib/auth-utils"
 import Image from "next/image"
 
@@ -106,6 +106,15 @@ export default function StoreCreatePage() {
     const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
+            // 🔍 디버깅: 파일 선택 정보
+            console.log("📎 [파일 선택됨]", {
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                sizeInKB: (file.size / 1024).toFixed(2) + " KB",
+                lastModified: new Date(file.lastModified).toLocaleString(),
+            })
+
             // 파일 크기 체크 (5MB 제한)
             if (file.size > 5 * 1024 * 1024) {
                 alert("파일 크기는 5MB 이하여야 합니다.")
@@ -160,11 +169,12 @@ export default function StoreCreatePage() {
                 createdAt: new Date().toISOString().split("T")[0], // 현재 날짜를 YYYY-MM-DD 형태로
             }
 
-            const data = await createStore(requestData)
+            // ⭐ 파일과 정보를 한 번에 전송!
+            const data = await createStore(requestData, logoFile || undefined)
 
             setResult({
                 type: "SUCCESS",
-                message: "가게가 성공적으로 등록되었습니다.",
+                message: "가게가 성공적으로 등록되었습니다." + (logoFile ? " 로고도 함께 등록되었습니다." : ""),
                 data: data,
             })
 

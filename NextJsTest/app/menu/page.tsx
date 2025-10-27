@@ -106,7 +106,9 @@ export default function MenuManagementPage() {
                         </Card>
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                            {menuItems.map((item) => (
+                            {menuItems.map((item) => {
+                                console.log("🖼️ [메뉴 이미지]", item.id, item.title, item.thumbnail)
+                                return (
                                 <Card key={item.id} className="overflow-hidden">
                                     <div className="relative h-40">
                                         <Image src={item.thumbnail || "/placeholder.svg"} alt={item.title} fill className="object-cover" />
@@ -133,7 +135,8 @@ export default function MenuManagementPage() {
                                         </div>
                                     </div>
                                 </Card>
-                            ))}
+                            )
+                            })}
                         </div>
                     )}
                 </div>

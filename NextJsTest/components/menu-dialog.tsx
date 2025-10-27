@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Loader2 } from "lucide-react"
+import { Loader2, Upload, X } from "lucide-react"
 import { createMenu, updateMenu, type MenuItem } from "@/lib/api-client"
 
 interface MenuDialogProps {
@@ -20,6 +20,8 @@ interface MenuDialogProps {
 
 export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
   const [saving, setSaving] = useState(false)
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>("")
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -35,6 +37,8 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
         price: menu.price,
         thumbnail: menu.thumbnail,
       })
+      setThumbnailPreview(menu.thumbnail)
+      setThumbnailFile(null)
     } else {
       setFormData({
         title: "",
@@ -42,8 +46,41 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
         price: 0,
         thumbnail: "",
       })
+      setThumbnailPreview("")
+      setThumbnailFile(null)
     }
   }, [menu, open])
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // 파일 크기 체크 (5MB 제한)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("파일 크기는 5MB 이하여야 합니다.")
+        return
+      }
+
+      // 이미지 파일 타입 체크
+      if (!file.type.startsWith("image/")) {
+        alert("이미지 파일만 업로드 가능합니다.")
+        return
+      }
+
+      setThumbnailFile(file)
+
+      // 미리보기 생성
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setThumbnailPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleThumbnailRemove = () => {
+    setThumbnailFile(null)
+    setThumbnailPreview("")
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -52,16 +89,21 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
       setSaving(true)
 
       if (menu) {
-        // Update existing menu
+        // Update existing menu (파일과 함께 전송)
         await updateMenu(menu.id, {
-          ...formData,
-        })
+          title: formData.title,
+          content: formData.content,
+          price: formData.price,
+          thumbnail: "", // 파일이 있으면 무시됨
+        }, thumbnailFile || undefined)
       } else {
-        // Create new menu
+        // Create new menu (파일과 함께 전송)
         await createMenu({
           storeId,
-          ...formData,
-        })
+          title: formData.title,
+          content: formData.content,
+          price: formData.price,
+        }, thumbnailFile || undefined)
       }
 
       onClose(true)
@@ -113,15 +155,34 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
             />
           </div>
 
+          {/* 메뉴 이미지 첨부 */}
           <div className="grid gap-2">
-            <Label htmlFor="thumbnail">이미지 URL</Label>
-            <Input
-              id="thumbnail"
-              value={formData.thumbnail}
-              onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
-              placeholder="https://example.com/image.jpg"
-              required
-            />
+            <Label>메뉴 이미지</Label>
+            {!thumbnailPreview ? (
+              <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center">
+                <Upload className="w-8 h-8 mx-auto mb-2 text-slate-400" />
+                <label className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors">
+                  <Upload className="w-4 h-4" />
+                  이미지 선택
+                  <input type="file" accept="image/*" onChange={handleThumbnailChange} className="hidden" />
+                </label>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="relative">
+                  <img src={thumbnailPreview} alt="미리보기" className="w-full h-32 object-contain bg-slate-50 rounded-lg border" />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    className="absolute top-2 right-2 h-8 w-8 p-0"
+                    onClick={handleThumbnailRemove}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

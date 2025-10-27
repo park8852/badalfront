@@ -180,7 +180,7 @@ export default function StoreManagementPage() {
       setSaving(true)
       // logo 필드를 제외하고 API 요청
       const { logo, ...updateData } = formData
-      await updateStoreInfo(storeId, updateData)
+      await updateStoreInfo(storeId, updateData, logoFile || undefined)
       alert("가게 정보가 저장되었습니다.")
       await loadStoreInfo()
       setIsEditing(false)
