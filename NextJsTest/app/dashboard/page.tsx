@@ -54,7 +54,11 @@ export default function DashboardPage() {
     setSelectedOrderId(orderId)
   }
 
+<<<<<<< HEAD
   // 자동 새로고침 (15초마다)
+=======
+  // 자동 새로고침 (3초마다)
+>>>>>>> 31c4396ff715e10aa2d36e7cfaa23fb5829d1eca
   useEffect(() => {
     if (!storeId) return
     
@@ -63,7 +67,11 @@ export default function DashboardPage() {
       if (selectedOrderId) {
         mutateOrderDetail()
       }
+<<<<<<< HEAD
     }, 3000) // 15초마다 자동 새로고침
+=======
+    }, 3000) // 3초마다 자동 새로고침
+>>>>>>> 31c4396ff715e10aa2d36e7cfaa23fb5829d1eca
 
     return () => clearInterval(interval)
   }, [storeId, selectedOrderId, mutateOrders, mutateOrderDetail])

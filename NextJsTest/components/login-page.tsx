@@ -56,7 +56,7 @@ const LoginPage = ({ onPageChange, onLoginSuccess }: LoginPageProps) => {
         if (!token) {
           setError("토큰이 응답에 없습니다.")
         } else {
-          // 역할 결정 (일관성 있게 USER를 기본값으로 설정)
+          // 백엔드에서 받은 role 사용 (없으면 기본값 "OWNER")
           const userRole = response.data.role || "OWNER"
           
           setAuthInfo({ 

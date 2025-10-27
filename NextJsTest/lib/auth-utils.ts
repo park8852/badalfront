@@ -65,7 +65,8 @@ export function getAuthHeaders(): Record<string, string> {
 }
 
 export function handleAuthError(response: Response): boolean {
-  if (response.status === 401) {
+  // 401 (Unauthorized) 또는 403 (Forbidden) 에러 처리
+  if (response.status === 401 || response.status === 403) {
     clearAuthInfo()
     // 토큰 만료 시 알림 표시 후 로그인 페이지로 리다이렉션
     if (typeof window !== "undefined") {
