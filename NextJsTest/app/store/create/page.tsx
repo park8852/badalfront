@@ -14,30 +14,6 @@ import { getAuthInfo, setAuthInfo, clearAuthInfo } from "@/lib/auth-utils"
 import Image from "next/image"
 
 export default function StoreCreatePage() {
-<<<<<<< HEAD
-  const router = useRouter()
-  const [authInfo, setLocalAuthInfo] = useState<any>(null)
-  const [isClient, setIsClient] = useState(false)
-  const [form, setForm] = useState({
-    name: "",
-    category: "중국집",
-    phone: "",
-    address: "",
-    opentime: "09:00",
-    endtime: "23:00",
-  })
-  const [logoFile, setLogoFile] = useState<File | null>(null)
-  const [logoPreview, setLogoPreview] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<{ type: string; message: string; data?: any } | null>(null)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-
-  // 클라이언트 사이드에서만 authInfo 로드
-  useEffect(() => {
-    setIsClient(true)
-    setLocalAuthInfo(getAuthInfo())
-  }, [])
-=======
     const router = useRouter()
     const [authInfo, setLocalAuthInfo] = useState<any>(null)
     const [isClient, setIsClient] = useState(false)
@@ -60,7 +36,6 @@ export default function StoreCreatePage() {
         setIsClient(true)
         setLocalAuthInfo(getAuthInfo())
     }, [])
->>>>>>> 31c4396ff715e10aa2d36e7cfaa23fb5829d1eca
 
     // 로그아웃 핸들러
     const handleLogout = () => {
@@ -121,70 +96,7 @@ export default function StoreCreatePage() {
             return
         }
 
-<<<<<<< HEAD
-    setLoading(true)
-    setResult(null)
-
-    try {
-      // 시간 정보를 분리하여 API 요청 형태로 변환
-      const [openH, openM] = form.opentime.split(":").map(Number)
-      const [closedH, closedM] = form.endtime.split(":").map(Number)
-
-      const requestData: CreateStoreRequest = {
-        name: form.name,
-        category: form.category,
-        phone: form.phone,
-        address: form.address,
-        openH: openH,
-        openM: openM,
-        closedH: closedH,
-        closedM: closedM,
-        createdAt: new Date().toISOString().split("T")[0], // 현재 날짜를 YYYY-MM-DD 형태로
-      }
-
-      const data = await createStore(requestData)
-
-      setResult({
-        type: "SUCCESS",
-        message: "가게가 성공적으로 등록되었습니다.",
-        data: data,
-      })
-
-      // 스토어 생성 성공 시 storeId 반영 (응답의 data.id가 storeId)
-      const createdStoreId: number | undefined = typeof data?.id === "number" ? data.id : undefined
-
-      const current = getAuthInfo()
-      if (current?.token && createdStoreId !== undefined) {
-        // localStorage에 저장
-        setAuthInfo({
-          token: current.token,
-          userId: current.userId,
-          role: current.role,
-          storeId: createdStoreId,
-        })
-        // 로컬 state도 업데이트
-        setLocalAuthInfo({
-          token: current.token,
-          userId: current.userId,
-          role: current.role,
-          storeId: createdStoreId,
-        })
-      }
-
-      // 성공 후 대시보드로 이동
-      setTimeout(() => {
-        router.push("/dashboard")
-      }, 1200)
-    } catch (err: any) {
-      setResult({
-        type: "FAIL",
-        message: err.message || "네트워크 오류가 발생했습니다.",
-      })
-    } finally {
-      setLoading(false)
-=======
         setForm((prev) => ({ ...prev, [name]: value }))
->>>>>>> 31c4396ff715e10aa2d36e7cfaa23fb5829d1eca
     }
 
     const handleCategoryChange = (value: string) => {

@@ -11,13 +11,6 @@ import { MenuDialog } from "@/components/menu-dialog"
 import { Sidebar } from "@/components/sidebar"
 
 export default function MenuManagementPage() {
-<<<<<<< HEAD
-  const [loading, setLoading] = useState(true)
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingMenu, setEditingMenu] = useState<MenuItem | null>(null)
-  const storeId = getAuthInfo()?.storeId
-=======
     const [loading, setLoading] = useState(true)
     const [menuItems, setMenuItems] = useState<MenuItem[]>([])
     const [dialogOpen, setDialogOpen] = useState(false)
@@ -28,7 +21,6 @@ export default function MenuManagementPage() {
         loadMenus()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [storeId])
->>>>>>> 31c4396ff715e10aa2d36e7cfaa23fb5829d1eca
 
     async function loadMenus() {
         if (!storeId) return
@@ -81,50 +73,10 @@ export default function MenuManagementPage() {
         )
     }
 
-<<<<<<< HEAD
-          {menuItems.length === 0 ? (
-            <Card className="p-12 text-center">
-              <p className="text-muted-foreground">등록된 메뉴가 없습니다.</p>
-              <Button onClick={handleAdd} className="mt-4">
-                <Plus className="mr-2 h-4 w-4" />첫 메뉴 추가하기
-              </Button>
-            </Card>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {menuItems.map((item) => (
-                <Card key={item.id} className="overflow-hidden">
-                  <div className="relative h-40">
-                    <Image src={item.thumbnail || "/placeholder.svg"} alt={item.title} fill className="object-cover" />
-                  </div>
-                  <div className="p-3">
-                    <div className="mb-2">
-                      <h3 className="text-sm font-semibold">{item.title}</h3>
-                      <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.content}</p>
-                    </div>
-                    <p className="mt-2 text-base font-bold">{item.price.toLocaleString()}원</p>
-                    <div className="mt-3 flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 bg-transparent text-xs h-8"
-                        onClick={() => handleEdit(item)}
-                      >
-                        <Edit className="mr-1 h-3 w-3" />
-                        수정
-                      </Button>
-                      <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => handleDelete(item.id)}>
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-=======
     if (!storeId) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
->>>>>>> 31c4396ff715e10aa2d36e7cfaa23fb5829d1eca
             </div>
         )
     }
