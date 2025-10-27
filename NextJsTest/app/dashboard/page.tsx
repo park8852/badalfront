@@ -128,13 +128,6 @@ export default function DashboardPage() {
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="h-12 w-12 rounded-md bg-muted overflow-hidden flex-shrink-0">
-                            <img
-                              src="/placeholder.svg"
-                              alt={order.menuTitle}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="font-mono text-sm font-medium">#{order.id}</span>
@@ -237,13 +230,6 @@ export default function DashboardPage() {
                       <h3 className="mb-4 text-lg font-semibold">주문 상세</h3>
                       <div className="space-y-4">
                         <div className="flex gap-4">
-                          <div className="h-24 w-24 rounded-md bg-muted overflow-hidden flex-shrink-0">
-                            <img
-                              src="/placeholder.svg"
-                              alt={orderDetails.menuTitle}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
                           <div className="flex-1">
                             <p className="font-semibold text-lg">{orderDetails.menuTitle}</p>
                             <p className="text-sm text-muted-foreground mt-1">상점: {orderDetails.storeName}</p>

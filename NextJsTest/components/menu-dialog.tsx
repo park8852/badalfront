@@ -22,11 +22,11 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
   const [saving, setSaving] = useState(false)
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [thumbnailPreview, setThumbnailPreview] = useState<string>("")
+  const [existingThumbnailUrl, setExistingThumbnailUrl] = useState<string>("")
   const [formData, setFormData] = useState({
     title: "",
     content: "",
     price: 0,
-    thumbnail: "",
   })
 
   useEffect(() => {
@@ -35,18 +35,18 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
         title: menu.title,
         content: menu.content,
         price: menu.price,
-        thumbnail: menu.thumbnail,
       })
       setThumbnailPreview(menu.thumbnail)
+      setExistingThumbnailUrl(menu.thumbnail)
       setThumbnailFile(null)
     } else {
       setFormData({
         title: "",
         content: "",
         price: 0,
-        thumbnail: "",
       })
       setThumbnailPreview("")
+      setExistingThumbnailUrl("")
       setThumbnailFile(null)
     }
   }, [menu, open])
@@ -90,12 +90,21 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
 
       if (menu) {
         // Update existing menu (파일과 함께 전송)
+        // 기존 이미지가 있고 새 이미지를 선택하지 않았으면, 기존 이미지를 다시 전송
+        let fileToSend = thumbnailFile
+        if (!thumbnailFile && existingThumbnailUrl) {
+          // 기존 이미지를 File 객체로 변환
+          const response = await fetch(existingThumbnailUrl)
+          const blob = await response.blob()
+          const fileName = existingThumbnailUrl.split('/').pop() || 'image.jpg'
+          fileToSend = new File([blob], fileName, { type: blob.type })
+        }
+        
         await updateMenu(menu.id, {
           title: formData.title,
           content: formData.content,
           price: formData.price,
-          thumbnail: "", // 파일이 있으면 무시됨
-        }, thumbnailFile || undefined)
+        }, fileToSend || undefined)
       } else {
         // Create new menu (파일과 함께 전송)
         await createMenu({

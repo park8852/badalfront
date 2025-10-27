@@ -73,7 +73,6 @@ export interface UpdateMenuRequest {
     title: string
     content: string
     price: number
-    thumbnail: string
 }
 
 // Order API types
@@ -564,39 +563,26 @@ export async function updateMenu(menuId: number, data: UpdateMenuRequest, file?:
 
     console.log("[v0] PUT Update Menu Request:", { url, token: token ? "present" : "missing", menuId, data, hasFile: !!file })
 
-    // 파일이 있으면 FormData로, 없으면 JSON으로
-    let body: FormData | string
-    let headers: Record<string, string>
-
+    // 메뉴 수정은 항상 FormData로 전송 (백엔드 요구사항)
+    const formData = new FormData()
+    
+    // 파일이 있으면 추가 (백엔드가 thumbnailFile 필드명을 사용)
     if (file) {
-        // FormData 방식 (파일과 데이터 함께 전송)
-        const formData = new FormData()
-        
-        // 파일 추가 (백엔드가 thumbnailFile 필드명을 사용)
         formData.append("thumbnailFile", file)
-        
-        // 다른 데이터들 추가
-        formData.append("title", data.title)
-        formData.append("content", data.content)
-        formData.append("price", data.price.toString())
-        
-        body = formData
-        headers = {
-            Authorization: `Bearer ${token}`,
-            // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
-        }
-        
-        console.log("📤 [FormData로 전송] 파일과 데이터 함께 전송")
-    } else {
-        // JSON 방식 (기존 방식)
-        body = JSON.stringify(data)
-        headers = {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-        }
-        
-        console.log("📤 [JSON으로 전송] 데이터만 전송")
     }
+    
+    // 데이터 추가
+    formData.append("title", data.title)
+    formData.append("content", data.content)
+    formData.append("price", data.price.toString())
+    
+    const body = formData
+    const headers = {
+        Authorization: `Bearer ${token}`,
+        // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
+    }
+    
+    console.log("📤 [FormData로 전송] 메뉴 수정")
 
     const response = await fetch(url, {
         method: "POST",
