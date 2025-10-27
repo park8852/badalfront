@@ -15,7 +15,7 @@ import Image from "next/image"
 
 export default function StoreCreatePage() {
   const router = useRouter()
-  const [authInfo, setAuthInfo] = useState<any>(null)
+  const [authInfo, setLocalAuthInfo] = useState<any>(null)
   const [isClient, setIsClient] = useState(false)
   const [form, setForm] = useState({
     name: "",
@@ -34,7 +34,7 @@ export default function StoreCreatePage() {
   // 클라이언트 사이드에서만 authInfo 로드
   useEffect(() => {
     setIsClient(true)
-    setAuthInfo(getAuthInfo())
+    setLocalAuthInfo(getAuthInfo())
   }, [])
 
   // 로그아웃 핸들러
@@ -172,8 +172,16 @@ export default function StoreCreatePage() {
       const createdStoreId: number | undefined = typeof data?.id === "number" ? data.id : undefined
 
       const current = getAuthInfo()
-      if (current?.token) {
+      if (current?.token && createdStoreId !== undefined) {
+        // localStorage에 저장
         setAuthInfo({
+          token: current.token,
+          userId: current.userId,
+          role: current.role,
+          storeId: createdStoreId,
+        })
+        // 로컬 state도 업데이트
+        setLocalAuthInfo({
           token: current.token,
           userId: current.userId,
           role: current.role,

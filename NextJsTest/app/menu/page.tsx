@@ -15,7 +15,6 @@ export default function MenuManagementPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingMenu, setEditingMenu] = useState<MenuItem | null>(null)
-
   const storeId = getAuthInfo()?.storeId
 
   useEffect(() => {
@@ -106,30 +105,30 @@ export default function MenuManagementPage() {
               </Button>
             </Card>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {menuItems.map((item) => (
                 <Card key={item.id} className="overflow-hidden">
-                  <div className="relative aspect-square">
+                  <div className="relative h-40">
                     <Image src={item.thumbnail || "/placeholder.svg"} alt={item.title} fill className="object-cover" />
                   </div>
-                  <div className="p-4">
+                  <div className="p-3">
                     <div className="mb-2">
-                      <h3 className="font-semibold">{item.title}</h3>
-                      <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{item.content}</p>
+                      <h3 className="text-sm font-semibold">{item.title}</h3>
+                      <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.content}</p>
                     </div>
-                    <p className="mt-2 text-lg font-bold">{item.price.toLocaleString()}원</p>
-                    <div className="mt-4 flex gap-2">
+                    <p className="mt-2 text-base font-bold">{item.price.toLocaleString()}원</p>
+                    <div className="mt-3 flex gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex-1 bg-transparent"
+                        className="flex-1 bg-transparent text-xs h-8"
                         onClick={() => handleEdit(item)}
                       >
-                        <Edit className="mr-2 h-4 w-4" />
+                        <Edit className="mr-1 h-3 w-3" />
                         수정
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)}>
-                        <Trash2 className="h-4 w-4" />
+                      <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => handleDelete(item.id)}>
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
