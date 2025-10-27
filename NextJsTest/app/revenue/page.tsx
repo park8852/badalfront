@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
-import { CalendarDays, X, Check, CalendarRange, TrendingUp, DollarSign, ShoppingBag } from "lucide-react"
+import React, { useMemo, useState, useEffect } from "react"
+import { CalendarDays, X, Check, CalendarRange, TrendingUp, DollarSign, ShoppingBag, Loader2 } from "lucide-react"
 import { DayPicker } from "react-day-picker"
 import "react-day-picker/dist/style.css"
 import { format, startOfWeek, endOfWeek, addWeeks, startOfMonth, endOfMonth } from "date-fns"
@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Sidebar } from "@/components/sidebar"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { getOrdersByPeriod, type OrderPeriodResponse } from "@/lib/api-client"
 
 // Date helpers
 type Range = { from?: Date; to?: Date } | undefined
@@ -20,7 +21,10 @@ function fmt(d?: Date) {
 
 export default function RevenuePage() {
   const [open, setOpen] = useState(false)
-  const [range, setRange] = useState<Range>()
+  const [range, setRange] = useState<Range>({ from: new Date(), to: new Date() })
+  const [orders, setOrders] = useState<OrderPeriodResponse[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const label = useMemo(() => {
     if (range?.from && range?.to) return `${fmt(range.from)} ~ ${fmt(range.to)}`
@@ -70,18 +74,70 @@ export default function RevenuePage() {
     },
   ]
 
-  // Mock revenue data
-  const revenueData = {
-    totalRevenue: 1250000,
-    totalOrders: 45,
-    averageOrderValue: 27778,
-    dailyRevenue: [
-      { date: "2024-01-15", revenue: 150000, orders: 8 },
-      { date: "2024-01-16", revenue: 200000, orders: 12 },
-      { date: "2024-01-17", revenue: 180000, orders: 10 },
-      { date: "2024-01-18", revenue: 220000, orders: 15 },
-    ]
+  // API 호출 함수
+  const fetchOrders = async (startDate: Date, endDate: Date) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const startDay = format(startDate, "yyyy-MM-dd")
+      const endDay = format(endDate, "yyyy-MM-dd")
+      
+      const data = await getOrdersByPeriod({ startDay, endDay })
+      setOrders(data)
+    } catch (err) {
+      console.error("Failed to fetch orders:", err)
+      setError("주문 데이터를 불러오는데 실패했습니다.")
+    } finally {
+      setLoading(false)
+    }
   }
+
+  // 기간이 변경될 때마다 API 호출
+  useEffect(() => {
+    if (range?.from && range?.to) {
+      fetchOrders(range.from, range.to)
+    }
+  }, [range])
+
+  // 매출 데이터 계산
+  const revenueData = useMemo(() => {
+    if (orders.length === 0) {
+      return {
+        totalRevenue: 0,
+        totalOrders: 0,
+        averageOrderValue: 0,
+        dailyRevenue: []
+      }
+    }
+
+    const totalRevenue = orders.reduce((sum, order) => sum + order.totalPrice, 0)
+    const totalOrders = orders.length
+    const averageOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0
+
+    // 일별 매출 데이터 생성
+    const dailyMap = new Map<string, { revenue: number; orders: number }>()
+    
+    orders.forEach(order => {
+      const date = order.createdAt.split(' ')[0] // "2025-10-24 17:15" -> "2025-10-24"
+      const existing = dailyMap.get(date) || { revenue: 0, orders: 0 }
+      dailyMap.set(date, {
+        revenue: existing.revenue + order.totalPrice,
+        orders: existing.orders + 1
+      })
+    })
+
+    const dailyRevenue = Array.from(dailyMap.entries())
+      .map(([date, data]) => ({ date, ...data }))
+      .sort((a, b) => a.date.localeCompare(b.date))
+
+    return {
+      totalRevenue,
+      totalOrders,
+      averageOrderValue,
+      dailyRevenue
+    }
+  }, [orders])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
@@ -155,6 +211,18 @@ export default function RevenuePage() {
             {/* Revenue Summary */}
             {range?.from && range?.to && (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                {loading && (
+                  <div className="col-span-full flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+                    <span className="ml-2 text-gray-500">데이터를 불러오는 중...</span>
+                  </div>
+                )}
+                
+                {error && (
+                  <div className="col-span-full bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p className="text-red-600">{error}</p>
+                  </div>
+                )}
                 <Card className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -202,7 +270,9 @@ export default function RevenuePage() {
                     <div>
                       <p className="text-sm font-medium text-gray-600">일평균 매출</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        {Math.round(revenueData.totalRevenue / 4).toLocaleString()}원
+                        {revenueData.dailyRevenue.length > 0 
+                          ? Math.round(revenueData.totalRevenue / revenueData.dailyRevenue.length).toLocaleString()
+                          : 0}원
                       </p>
                     </div>
                     <div className="p-3 bg-orange-100 rounded-full">
@@ -214,31 +284,37 @@ export default function RevenuePage() {
             )}
 
             {/* Daily Revenue Chart */}
-            {range?.from && range?.to && (
+            {range?.from && range?.to && !loading && (
               <Card className="p-6">
                 <h3 className="text-lg font-semibold mb-4">일별 매출 현황</h3>
-                <div className="space-y-4">
-                  {revenueData.dailyRevenue.map((day, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span className="font-medium">{day.date}</span>
-                      </div>
-                      <div className="flex items-center gap-6">
-                        <div className="text-right">
-                          <div className="text-sm text-gray-500">주문수</div>
-                          <div className="font-semibold">{day.orders}건</div>
+                {revenueData.dailyRevenue.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    선택한 기간에 주문 데이터가 없습니다.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {revenueData.dailyRevenue.map((day, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                          <span className="font-medium">{day.date}</span>
                         </div>
-                        <div className="text-right">
-                          <div className="text-sm text-gray-500">매출</div>
-                          <div className="font-semibold text-green-600">
-                            {day.revenue.toLocaleString()}원
+                        <div className="flex items-center gap-6">
+                          <div className="text-right">
+                            <div className="text-sm text-gray-500">주문수</div>
+                            <div className="font-semibold">{day.orders}건</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm text-gray-500">매출</div>
+                            <div className="font-semibold text-green-600">
+                              {day.revenue.toLocaleString()}원
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </Card>
             )}
           </div>
@@ -300,7 +376,7 @@ export default function RevenuePage() {
                     <DayPicker
                       locale={ko}
                       mode="range"
-                      selected={range}
+                      selected={range as any}
                       onSelect={setRange}
                       numberOfMonths={2}
                       pagedNavigation

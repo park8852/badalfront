@@ -78,28 +78,36 @@ export interface UpdateMenuRequest {
 // Order API types
 export interface Order {
     id: number
-    storeid: number
-    menuid: number
-    menu_name: string
-    thumbnail: string
+    memberId: number
+    storeId: number
+    menuId: number
     quantity: number
-    total_price: number
-    created_at: string
+    totalPrice: number
+    createdAt: string
+    customerName: string
+    customerPhone: string
+    customerAddress: string
+    storeName: string
+    storeAddress: string
+    menuTitle: string
+    paymentMethod: string
 }
 
 export interface OrderDetail {
     id: number
-    storeid: number
-    menuid: number
+    memberId: number
+    storeId: number
+    menuId: number
     quantity: number
-    total_price: number
-    created_at: string
-    menu: {
-        id: number
-        name: string
-        price: number
-        thumbnail: string
-    }
+    totalPrice: number
+    createdAt: string
+    customerName: string
+    customerPhone: string
+    customerAddress: string
+    storeName: string
+    storeAddress: string
+    menuTitle: string
+    paymentMethod: string
 }
 
 // Store API functions
@@ -146,15 +154,15 @@ export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
 
     console.log("[v0] GET Store Info Response:", { status: response.status, ok: response.ok })
 
-  if (!response.ok) {
-    // 401 에러 시 자동 로그아웃 및 리다이렉션
-    if (handleAuthError(response)) {
-      return
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return
+        }
+        const errorText = await response.text()
+        console.error("[v0] GET Store Info Error:", errorText)
+        throw new Error("Failed to fetch store info")
     }
-    const errorText = await response.text()
-    console.error("[v0] GET Store Info Error:", errorText)
-    throw new Error("Failed to fetch store info")
-  }
 
     const responseData = await response.json()
     console.log("[v0] GET Store Info Data:", responseData)
@@ -184,15 +192,15 @@ export async function updateStoreInfo(storeId: number, data: UpdateStoreRequest)
 
     console.log("[v0] POST Update Store Response:", { status: response.status, ok: response.ok })
 
-  if (!response.ok) {
-    // 401 에러 시 자동 로그아웃 및 리다이렉션
-    if (handleAuthError(response)) {
-      return
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return
+        }
+        const errorText = await response.text()
+        console.error("[v0] POST Update Store Error:", errorText)
+        throw new Error("Failed to update store info")
     }
-    const errorText = await response.text()
-    console.error("[v0] POST Update Store Error:", errorText)
-    throw new Error("Failed to update store info")
-  }
 
     const responseData = await response.json()
     console.log("[v0] POST Update Store Data:", responseData)
@@ -215,15 +223,15 @@ export async function getMenusByStore(storeId: number): Promise<MenuItem[]> {
 
     console.log("[v0] GET Menus Response:", { status: response.status, ok: response.ok })
 
-  if (!response.ok) {
-    // 401 에러 시 자동 로그아웃 및 리다이렉션
-    if (handleAuthError(response)) {
-      return
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return
+        }
+        const errorText = await response.text()
+        console.error("[v0] GET Menus Error:", errorText)
+        throw new Error("Failed to fetch menus")
     }
-    const errorText = await response.text()
-    console.error("[v0] GET Menus Error:", errorText)
-    throw new Error("Failed to fetch menus")
-  }
 
     const responseData = await response.json()
     console.log("[v0] GET Menus Data:", responseData)
@@ -259,15 +267,15 @@ export async function createMenu(data: CreateMenuRequest): Promise<MenuItem> {
 
     console.log("[v0] POST Create Menu Response:", { status: response.status, ok: response.ok })
 
-  if (!response.ok) {
-    // 401 에러 시 자동 로그아웃 및 리다이렉션
-    if (handleAuthError(response)) {
-      return
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return
+        }
+        const errorText = await response.text()
+        console.error("[v0] POST Create Menu Error:", errorText)
+        throw new Error("Failed to create menu")
     }
-    const errorText = await response.text()
-    console.error("[v0] POST Create Menu Error:", errorText)
-    throw new Error("Failed to create menu")
-  }
 
     const responseData = await response.json()
     console.log("[v0] POST Create Menu Data:", responseData)
@@ -293,15 +301,15 @@ export async function updateMenu(menuId: number, data: UpdateMenuRequest): Promi
 
     console.log("[v0] PUT Update Menu Response:", { status: response.status, ok: response.ok })
 
-  if (!response.ok) {
-    // 401 에러 시 자동 로그아웃 및 리다이렉션
-    if (handleAuthError(response)) {
-      return
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return
+        }
+        const errorText = await response.text()
+        console.error("[v0] PUT Update Menu Error:", errorText)
+        throw new Error("Failed to update menu")
     }
-    const errorText = await response.text()
-    console.error("[v0] PUT Update Menu Error:", errorText)
-    throw new Error("Failed to update menu")
-  }
 
     const responseData = await response.json()
     console.log("[v0] PUT Update Menu Data:", responseData)
@@ -323,15 +331,15 @@ export async function deleteMenu(menuId: number): Promise<void> {
 
     console.log("[v0] DELETE Menu Response:", { status: response.status, ok: response.ok })
 
-  if (!response.ok) {
-    // 401 에러 시 자동 로그아웃 및 리다이렉션
-    if (handleAuthError(response)) {
-      return
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return
+        }
+        const errorText = await response.text()
+        console.error("[v0] DELETE Menu Error:", errorText)
+        throw new Error("Failed to delete menu")
     }
-    const errorText = await response.text()
-    console.error("[v0] DELETE Menu Error:", errorText)
-    throw new Error("Failed to delete menu")
-  }
 
     console.log("[v0] DELETE Menu Success")
 }
@@ -352,15 +360,15 @@ export async function getOrdersByStore(storeId: number): Promise<Order[]> {
 
     console.log("[v0] GET Orders Response:", { status: response.status, ok: response.ok })
 
-  if (!response.ok) {
-    // 401 에러 시 자동 로그아웃 및 리다이렉션
-    if (handleAuthError(response)) {
-      return
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return
+        }
+        const errorText = await response.text()
+        console.error("[v0] GET Orders Error:", errorText)
+        throw new Error("Failed to fetch orders")
     }
-    const errorText = await response.text()
-    console.error("[v0] GET Orders Error:", errorText)
-    throw new Error("Failed to fetch orders")
-  }
 
     const responseData = await response.json()
     console.log("[v0] GET Orders Data:", responseData)
@@ -393,17 +401,81 @@ export async function getOrderDetail(orderId: number): Promise<OrderDetail> {
 
     console.log("[v0] GET Order Detail Response:", { status: response.status, ok: response.ok })
 
-  if (!response.ok) {
-    // 401 에러 시 자동 로그아웃 및 리다이렉션
-    if (handleAuthError(response)) {
-      return
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return
+        }
+        const errorText = await response.text()
+        console.error("[v0] GET Order Detail Error:", errorText)
+        throw new Error("Failed to fetch order detail")
     }
-    const errorText = await response.text()
-    console.error("[v0] GET Order Detail Error:", errorText)
-    throw new Error("Failed to fetch order detail")
-  }
 
-    const data = await response.json()
-    console.log("[v0] GET Order Detail Data:", data)
-    return data
+    const responseData = await response.json()
+    console.log("[v0] GET Order Detail Data:", responseData)
+
+    // API 응답에서 data 필드만 추출하여 반환
+    const unwrapped = responseData && typeof responseData === "object" && "data" in responseData ? responseData.data : responseData
+    return unwrapped as OrderDetail
+}
+
+// 기간 내 주문 조회 API
+export interface OrderPeriodRequest {
+    startDay: string
+    endDay: string
+}
+
+export interface OrderPeriodResponse {
+    id: number
+    memberId: number
+    storeId: number
+    menuId: number
+    quantity: number
+    totalPrice: number
+    createdAt: string
+    customerName: string
+    customerPhone: string
+    customerAddress: string
+    storeName: string
+    storeAddress: string
+    menuTitle: string
+    paymentMethod: string
+}
+
+export async function getOrdersByPeriod(data: OrderPeriodRequest): Promise<OrderPeriodResponse[]> {
+    const token = getAuthToken()
+    const url = `${API_BASE_URL}/api/order/day`
+
+    console.log("[v0] POST Order Period Request:", { url, token: token ? "present" : "missing", data })
+
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    })
+
+    console.log("[v0] POST Order Period Response:", { status: response.status, ok: response.ok })
+
+    if (!response.ok) {
+        // 401 에러 시 자동 로그아웃 및 리다이렉션
+        if (handleAuthError(response)) {
+            return []
+        }
+        const errorText = await response.text()
+        console.error("[v0] POST Order Period Error:", errorText)
+        throw new Error("Failed to fetch orders by period")
+    }
+
+    const responseData = await response.json()
+    console.log("[v0] POST Order Period Data:", responseData)
+
+    // API 응답 구조에 따라 데이터 추출
+    if (responseData.responseType === "SUCCESS" && responseData.data) {
+        return responseData.data as OrderPeriodResponse[]
+    }
+
+    return []
 }
