@@ -34,6 +34,7 @@ export default function StoreManagementPage() {
   })
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string>("")
+  const [existingThumbnailUrl, setExistingThumbnailUrl] = useState<string>("")
 
   const defaultCategories = [
     "한식",
@@ -84,6 +85,7 @@ export default function StoreManagementPage() {
         thumbnail: data.thumbnail || "",
       })
       setLogoPreview(data.thumbnail || "")
+      setExistingThumbnailUrl(data.thumbnail || "")
     } catch (error) {
       console.error("Failed to load store info:", error)
     } finally {
@@ -129,7 +131,9 @@ export default function StoreManagementPage() {
         thumbnail: storeData.thumbnail || "",
       })
       setLogoPreview(storeData.thumbnail || "")
+      setExistingThumbnailUrl(storeData.thumbnail || "")
     }
+    setLogoFile(null)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -144,7 +148,23 @@ export default function StoreManagementPage() {
       setSaving(true)
       // logo 필드를 제외하고 API 요청
       const { thumbnail, ...updateData } = formData
-      await updateStoreInfo(storeId, updateData, logoFile || undefined)
+      
+      // 기존 이미지가 있고 새 이미지를 선택하지 않았으면, 기존 이미지를 다시 전송
+      let fileToSend = logoFile
+      if (!logoFile && existingThumbnailUrl) {
+        try {
+          // 기존 이미지를 File 객체로 변환
+          const response = await fetch(existingThumbnailUrl)
+          const blob = await response.blob()
+          const fileName = existingThumbnailUrl.split('/').pop() || 'image.jpg'
+          fileToSend = new File([blob], fileName, { type: blob.type })
+        } catch (error) {
+          console.error("Failed to convert existing image to file:", error)
+          // 변환 실패 시 그냥 진행
+        }
+      }
+      
+      await updateStoreInfo(storeId, updateData, fileToSend || undefined)
       alert("가게 정보가 저장되었습니다.")
       await loadStoreInfo()
       setIsEditing(false)

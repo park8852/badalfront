@@ -142,40 +142,31 @@ export async function createStore(data: CreateStoreRequest, file?: File): Promis
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.STORE.CREATE)
 
-    // 파일이 있으면 FormData로, 없으면 JSON으로
-    let body: FormData | string
-    let headers: Record<string, string>
-
+    // 무조건 FormData로 전송
+    const formData = new FormData()
+    
+    // 파일이 있으면 추가, 없으면 빈 문자열로 null 표현
     if (file) {
-        // FormData 방식 (파일과 데이터 함께 전송)
-        const formData = new FormData()
-        
-        // 파일 추가 (백엔드가 thumbnailFile 필드명을 사용)
         formData.append("thumbnailFile", file)
-        
-        // 다른 데이터들 추가
-        formData.append("name", data.name)
-        formData.append("category", data.category)
-        formData.append("phone", data.phone)
-        formData.append("address", data.address)
-        formData.append("openH", data.openH.toString())
-        formData.append("openM", data.openM.toString())
-        formData.append("closedH", data.closedH.toString())
-        formData.append("closedM", data.closedM.toString())
-        formData.append("createdAt", data.createdAt)
-        
-        body = formData
-        headers = {
-            Authorization: `Bearer ${token}`,
-            // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
-        }
     } else {
-        // JSON 방식 (기존 방식)
-        body = JSON.stringify(data)
-        headers = {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-        }
+        formData.append("thumbnailFile", "")
+    }
+    
+    // 다른 데이터들 추가
+    formData.append("name", data.name)
+    formData.append("category", data.category)
+    formData.append("phone", data.phone)
+    formData.append("address", data.address)
+    formData.append("openH", data.openH.toString())
+    formData.append("openM", data.openM.toString())
+    formData.append("closedH", data.closedH.toString())
+    formData.append("closedM", data.closedM.toString())
+    formData.append("createdAt", data.createdAt)
+    
+    const body = formData
+    const headers = {
+        Authorization: `Bearer ${token}`,
+        // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
     }
 
     const response = await fetch(url, {
@@ -320,46 +311,33 @@ export async function updateStoreInfo(storeId: number, data: UpdateStoreRequest,
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.STORE.INFO)
 
-    console.log("[v0]变更 Update Store Request:", { url, token: token ? "present" : "missing", data, hasFile: !!file })
+    console.log("[v0] Update Store Request:", { url, token: token ? "present" : "missing", data, hasFile: !!file })
 
-    // 파일이 있으면 FormData로, 없으면 JSON으로
-    let body: FormData | string
-    let headers: Record<string, string>
-
+    // 무조건 FormData로 전송
+    const formData = new FormData()
+    
+    // 파일이 있으면 추가 (없으면 아예 보내지 않음)
     if (file) {
-        // FormData 방식 (파일과 데이터 함께 전송)
-        const formData = new FormData()
-        
-        // 파일 추가 (백엔드가 thumbnailFile 필드명을 사용)
         formData.append("thumbnailFile", file)
-        
-        // 다른 데이터들 추가
-        formData.append("category", data.category)
-        formData.append("name", data.name)
-        formData.append("phone", data.phone)
-        formData.append("address", data.address)
-        formData.append("openH", data.openH.toString())
-        formData.append("openM", data.openM.toString())
-        formData.append("closedH", data.closedH.toString())
-        formData.append("closedM", data.closedM.toString())
-        
-        body = formData
-        headers = {
-            Authorization: `Bearer ${token}`,
-            // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
-        }
-        
-        console.log("📤 [FormData로 전송] 파일과 데이터 함께 전송")
-    } else {
-        // JSON 방식 (기존 방식)
-        body = JSON.stringify(data)
-        headers = {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-        }
-        
-        console.log("📤 [JSON으로 전송] 데이터만 전송")
     }
+    
+    // 다른 데이터들 추가
+    formData.append("category", data.category)
+    formData.append("name", data.name)
+    formData.append("phone", data.phone)
+    formData.append("address", data.address)
+    formData.append("openH", data.openH.toString())
+    formData.append("openM", data.openM.toString())
+    formData.append("closedH", data.closedH.toString())
+    formData.append("closedM", data.closedM.toString())
+    
+    const body = formData
+    const headers = {
+        Authorization: `Bearer ${token}`,
+        // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
+    }
+    
+    console.log("📤 [FormData로 전송] 무조건 FormData 전송")
 
     const response = await fetch(url, {
         method: "POST",
@@ -443,40 +421,32 @@ export async function createMenu(data: CreateMenuRequest, file?: File): Promise<
 
     console.log("[v0] POST Create Menu Request:", { url, token: token ? "present" : "missing", data, hasFile: !!file })
 
-    // 파일이 있으면 FormData로, 없으면 JSON으로
+    // 무조건 FormData로 전송
     let body: FormData | string
     let headers: Record<string, string>
+    
+    const formData = new FormData()
 
+    // 파일이 있으면 추가, 없으면 빈 문자열로 null 표현
     if (file) {
-        // FormData 방식 (파일과 데이터 함께 전송)
-        const formData = new FormData()
-        
-        // 파일 추가 (백엔드가 thumbnailFile 필드명을 사용)
         formData.append("thumbnailFile", file)
-        
-        // 다른 데이터들 추가
-        formData.append("storeId", data.storeId.toString())
-        formData.append("title", data.title)
-        formData.append("content", data.content)
-        formData.append("price", data.price.toString())
-        
-        body = formData
-        headers = {
-            Authorization: `Bearer ${token}`,
-            // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
-        }
-        
-        console.log("📤 [FormData로 전송] 파일과 데이터 함께 전송")
     } else {
-        // JSON 방식 (기존 방식)
-        body = JSON.stringify(data)
-        headers = {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-        }
-        
-        console.log("📤 [JSON으로 전송] 데이터만 전송")
+        formData.append("thumbnailFile", "")
     }
+    
+    // 다른 데이터들 추가
+    formData.append("storeId", data.storeId.toString())
+    formData.append("title", data.title)
+    formData.append("content", data.content)
+    formData.append("price", data.price.toString())
+    
+    body = formData
+    headers = {
+        Authorization: `Bearer ${token}`,
+        // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
+    }
+    
+    console.log("📤 [FormData로 전송] 무조건 FormData 전송")
 
     const response = await fetch(url, {
         method: "POST",
