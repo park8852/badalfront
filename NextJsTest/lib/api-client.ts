@@ -148,8 +148,6 @@ export async function createStore(data: CreateStoreRequest, file?: File): Promis
     // 파일이 있으면 추가, 없으면 빈 문자열로 null 표현
     if (file) {
         formData.append("thumbnailFile", file)
-    } else {
-        formData.append("thumbnailFile", "")
     }
     
     // 다른 데이터들 추가
@@ -427,11 +425,9 @@ export async function createMenu(data: CreateMenuRequest, file?: File): Promise<
     
     const formData = new FormData()
 
-    // 파일이 있으면 추가, 없으면 빈 문자열로 null 표현
+    // 파일이 있으면 추가 (없으면 아예 보내지 않음 - null로 처리됨)
     if (file) {
         formData.append("thumbnailFile", file)
-    } else {
-        formData.append("thumbnailFile", "")
     }
     
     // 다른 데이터들 추가
