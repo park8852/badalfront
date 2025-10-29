@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getAuthInfo } from "@/lib/auth-utils"
+import { getNoticeList, NoticeItem } from "@/lib/api-client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -15,19 +16,12 @@ import {
   ArrowLeft
 } from "lucide-react"
 
-interface Notice {
-  id: number
-  title: string
-  content: string
-  author: string
-  createdAt: string
-  isImportant: boolean
-}
+// NoticeItem 타입을 사용하므로 별도 인터페이스 불필요
 
 const NoticePage = () => {
   const router = useRouter()
   const [authInfo, setAuthInfo] = useState(getAuthInfo())
-  const [notices, setNotices] = useState<Notice[]>([])
+  const [notices, setNotices] = useState<NoticeItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
 
@@ -43,43 +37,8 @@ const NoticePage = () => {
 
   const loadNotices = async () => {
     try {
-      // TODO: 실제 API 연동
-      // 임시 데이터
-      const mockNotices: Notice[] = [
-        {
-          id: 1,
-          title: "시스템 점검 안내",
-          content: "2024년 1월 15일 오전 2시부터 4시까지 시스템 점검이 진행됩니다. 이용에 불편을 드려 죄송합니다.\n\n점검 시간: 2024년 1월 15일 오전 2시 ~ 4시\n영향 범위: 전체 서비스 일시 중단\n\n점검 완료 후 정상 서비스가 재개됩니다.",
-          author: "관리자",
-          createdAt: "2024-01-10T10:00:00Z",
-          isImportant: true
-        },
-        {
-          id: 2,
-          title: "새로운 기능 업데이트",
-          content: "주문 관리 기능이 개선되었습니다. 더욱 편리한 주문 처리가 가능합니다.\n\n주요 개선사항:\n- 주문 상태 실시간 업데이트\n- 배달 완료 알림 기능 추가\n- 주문 내역 상세 조회 기능 개선",
-          author: "관리자",
-          createdAt: "2024-01-08T14:30:00Z",
-          isImportant: false
-        },
-        {
-          id: 3,
-          title: "정기 결제 일정 안내",
-          content: "매월 1일 정기 결제가 진행됩니다. 결제 실패 시 서비스 이용이 제한될 수 있습니다.\n\n결제 방법: 등록된 카드 자동 결제\n결제 실패 시: 3일 후 재시도\n문의사항: 고객센터 1588-0000",
-          author: "관리자",
-          createdAt: "2024-01-05T09:15:00Z",
-          isImportant: true
-        },
-        {
-          id: 4,
-          title: "배달료 정책 변경 안내",
-          content: "배달료 정책이 다음과 같이 변경됩니다.\n\n변경 내용:\n- 기본 배달료: 3,000원 → 2,500원\n- 무료 배달 최소 주문금액: 15,000원 → 12,000원\n- 적용일: 2024년 2월 1일부터",
-          author: "관리자",
-          createdAt: "2024-01-03T16:20:00Z",
-          isImportant: false
-        }
-      ]
-      setNotices(mockNotices)
+      const noticeList = await getNoticeList()
+      setNotices(noticeList)
     } catch (error) {
       console.error("공지사항 로드 실패:", error)
     } finally {

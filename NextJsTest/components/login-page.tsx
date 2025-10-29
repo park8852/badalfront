@@ -68,13 +68,10 @@ const LoginPage = ({ onPageChange, onLoginSuccess }: LoginPageProps) => {
           
           // 역할에 따른 리다이렉트
           if (userRole === "USER") {
-            console.log('USER 역할로 로그인 - 모바일 앱 페이지로 이동')
             router.replace("/")
           } else if (userRole === "ADMIN") {
-            console.log('ADMIN 역할로 로그인 - 관리자 페이지로 이동')
             router.replace("/admin")
           } else {
-            console.log('OWNER 역할로 로그인 - 대시보드로 이동')
             if (onLoginSuccess) onLoginSuccess()
           }
         }

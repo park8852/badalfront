@@ -62,9 +62,8 @@ const OrderManagementPage = () => {
 
   const handleDeleteOrder = async (orderId: number) => {
     try {
-      // TODO: 실제 API 연동
+      // 주문 삭제 API 호출 (백엔드에서 구현 필요)
       setOrders(prev => prev.filter(order => order.id !== orderId))
-      console.log(`주문 ${orderId} 삭제됨`)
     } catch (error) {
       console.error("주문 삭제 실패:", error)
     }

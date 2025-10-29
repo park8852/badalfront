@@ -1,7 +1,6 @@
 // API 서비스 - 회원 관련 API 호출을 담당
 import { getAuthHeaders, handleAuthError } from './auth-utils'
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://192.168.72.196:8080'
+import { API_CONFIG, createApiUrl } from './api-config'
 
 // 회원정보 수정 요청 타입
 export interface UpdateMemberRequest {
@@ -16,7 +15,7 @@ export const memberService = {
   // 회원가입
   async register(memberData: any) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/member/register`, {
+      const response = await fetch(createApiUrl(API_CONFIG.ENDPOINTS.AUTH.REGISTER), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,7 +38,7 @@ export const memberService = {
   // 로그인
   async login(loginData: any) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/member/login`, {
+      const response = await fetch(createApiUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +61,7 @@ export const memberService = {
   // 로그아웃
   async logout() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/member/logout`, {
+      const response = await fetch(createApiUrl(API_CONFIG.ENDPOINTS.AUTH.LOGOUT), {
         method: 'GET',
         headers: getAuthHeaders(),
       })
@@ -85,7 +84,7 @@ export const memberService = {
   // 회원정보조회
   async getMyInfo() {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/member/info`, {
+      const response = await fetch(createApiUrl(API_CONFIG.ENDPOINTS.AUTH.INFO), {
         method: 'GET',
         headers: getAuthHeaders(),
       })
@@ -108,7 +107,7 @@ export const memberService = {
   // 회원정보변경 (POST 방식)
   async updateMyInfo(memberData: UpdateMemberRequest) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/member/info`, {
+      const response = await fetch(createApiUrl(API_CONFIG.ENDPOINTS.AUTH.INFO), {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(memberData),

@@ -18,7 +18,8 @@ import {
   BarChart3,
   Package,
   UserCheck,
-  Megaphone
+  Megaphone,
+  HelpCircle
 } from "lucide-react"
 
 interface AdminStats {
@@ -240,6 +241,27 @@ const AdminPage = () => {
             </CardContent>
           </Card>
 
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <TrendingUp className="h-5 w-5 text-orange-600" />
+                <span>가게별 매출 정산</span>
+              </CardTitle>
+              <CardDescription>
+                각 가게별 매출 현황, 정산 내역, 수수료 관리
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => router.push("/admin/settlement")}
+              >
+                정산 관리하기
+              </Button>
+            </CardContent>
+          </Card>
+
           
 
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
@@ -263,45 +285,31 @@ const AdminPage = () => {
             </CardContent>
           </Card>
 
-         
-        </div>
-
-        {/* 최근 활동 */}
-        <div className="mt-8">
-          <Card>
+          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
-              <CardTitle>최근 활동</CardTitle>
+              <CardTitle className="flex items-center space-x-2">
+                <HelpCircle className="h-5 w-5 text-pink-600" />
+                <span>Q&A 관리</span>
+              </CardTitle>
               <CardDescription>
-                시스템에서 발생한 최근 활동 내역입니다.
+                사용자 문의사항 답변, FAQ 관리, 고객 지원
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">새로운 가게가 등록되었습니다</p>
-                    <p className="text-xs text-gray-500">2시간 전</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">새로운 사용자가 가입했습니다</p>
-                    <p className="text-xs text-gray-500">4시간 전</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">시스템 점검이 완료되었습니다</p>
-                    <p className="text-xs text-gray-500">1일 전</p>
-                  </div>
-                </div>
-              </div>
+              <Button 
+                className="w-full" 
+                variant="outline"
+                onClick={() => router.push("/admin/qa")}
+              >
+                Q&A 관리하기
+              </Button>
             </CardContent>
           </Card>
+
+         
         </div>
+
+        
       </main>
     </div>
   )

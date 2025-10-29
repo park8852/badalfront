@@ -1,6 +1,11 @@
-import { getAuthToken, handleAuthError } from './auth-utils'
+import { handleAuthError } from './auth-utils'
+import { API_CONFIG, createApiUrl } from './api-config'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080'
+// Get auth token from localStorage
+function getAuthToken(): string | null {
+  if (typeof window === "undefined") return null
+  return localStorage.getItem("authToken")
+}
 
 // 공통 API 호출 함수
 async function apiCall<T>(
@@ -8,7 +13,7 @@ async function apiCall<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const token = getAuthToken()
-  const url = `${API_BASE_URL}${endpoint}`
+  const url = createApiUrl(endpoint)
 
   const response = await fetch(url, {
     headers: {

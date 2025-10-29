@@ -106,15 +106,6 @@ export default function StoreCreatePage() {
     const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            // 🔍 디버깅: 파일 선택 정보
-            console.log("📎 [파일 선택됨]", {
-                name: file.name,
-                type: file.type,
-                size: file.size,
-                sizeInKB: (file.size / 1024).toFixed(2) + " KB",
-                lastModified: new Date(file.lastModified).toLocaleString(),
-            })
-
             // 파일 크기 체크 (5MB 제한)
             if (file.size > 5 * 1024 * 1024) {
                 alert("파일 크기는 5MB 이하여야 합니다.")
