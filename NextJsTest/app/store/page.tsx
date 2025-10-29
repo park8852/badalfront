@@ -108,6 +108,7 @@ export default function StoreManagementPage() {
   const handleRemoveLogo = () => {
     setLogoFile(null)
     setLogoPreview("")
+    setExistingThumbnailUrl("")
     setFormData({ ...formData, thumbnail: "" })
   }
 

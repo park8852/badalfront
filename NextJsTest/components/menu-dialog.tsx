@@ -80,6 +80,7 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
   const handleThumbnailRemove = () => {
     setThumbnailFile(null)
     setThumbnailPreview("")
+    setExistingThumbnailUrl("")
   }
 
   async function handleSubmit(e: React.FormEvent) {
