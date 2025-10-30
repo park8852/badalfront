@@ -133,7 +133,7 @@ export async function uploadFile(file: File): Promise<{ url: string }> {
     }
 
     const responseData = await response.json()
-    
+
     const unwrapped = responseData && typeof responseData === "object" && "data" in responseData ? responseData.data : responseData
     return unwrapped as { url: string }
 }
@@ -144,12 +144,12 @@ export async function createStore(data: CreateStoreRequest, file?: File): Promis
 
     // 무조건 FormData로 전송
     const formData = new FormData()
-    
+
     // 파일이 있으면 추가, 없으면 빈 문자열로 null 표현
     if (file) {
         formData.append("thumbnailFile", file)
     }
-    
+
     // 다른 데이터들 추가
     formData.append("name", data.name)
     formData.append("category", data.category)
@@ -160,7 +160,7 @@ export async function createStore(data: CreateStoreRequest, file?: File): Promis
     formData.append("closedH", data.closedH.toString())
     formData.append("closedM", data.closedM.toString())
     formData.append("createdAt", data.createdAt)
-    
+
     const body = formData
     const headers = {
         Authorization: `Bearer ${token}`,
@@ -296,7 +296,7 @@ export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
     console.log("[v0] GET Store Info Data:", responseData)
 
     const storeInfo = responseData.data
-    
+
     // 상대 경로를 전체 URL로 변환
     if (storeInfo.thumbnail && !storeInfo.thumbnail.startsWith('http')) {
         storeInfo.thumbnail = `${API_CONFIG.BASE_URL}/${storeInfo.thumbnail}`
@@ -313,12 +313,12 @@ export async function updateStoreInfo(storeId: number, data: UpdateStoreRequest,
 
     // 무조건 FormData로 전송
     const formData = new FormData()
-    
+
     // 파일이 있으면 추가 (없으면 아예 보내지 않음)
     if (file) {
         formData.append("thumbnailFile", file)
     }
-    
+
     // 다른 데이터들 추가
     formData.append("category", data.category)
     formData.append("name", data.name)
@@ -328,13 +328,13 @@ export async function updateStoreInfo(storeId: number, data: UpdateStoreRequest,
     formData.append("openM", data.openM.toString())
     formData.append("closedH", data.closedH.toString())
     formData.append("closedM", data.closedM.toString())
-    
+
     const body = formData
     const headers = {
         Authorization: `Bearer ${token}`,
         // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
     }
-    
+
     console.log("📤 [FormData로 전송] 무조건 FormData 전송")
 
     const response = await fetch(url, {
@@ -403,9 +403,9 @@ export async function getMenusByStore(storeId: number): Promise<MenuItem[]> {
     // 상대 경로를 전체 URL로 변환
     const menus = (unwrapped as MenuItem[]).map(menu => ({
         ...menu,
-        thumbnail: menu.thumbnail 
-            ? menu.thumbnail.startsWith('http') 
-                ? menu.thumbnail 
+        thumbnail: menu.thumbnail
+            ? menu.thumbnail.startsWith('http')
+                ? menu.thumbnail
                 : `${API_CONFIG.BASE_URL}/${menu.thumbnail}`  // 상대 경로 → 전체 URL
             : menu.thumbnail
     }))
@@ -422,26 +422,26 @@ export async function createMenu(data: CreateMenuRequest, file?: File): Promise<
     // 무조건 FormData로 전송
     let body: FormData | string
     let headers: Record<string, string>
-    
+
     const formData = new FormData()
 
     // 파일이 있으면 추가 (없으면 아예 보내지 않음 - null로 처리됨)
     if (file) {
         formData.append("thumbnailFile", file)
     }
-    
+
     // 다른 데이터들 추가
     formData.append("storeId", data.storeId.toString())
     formData.append("title", data.title)
     formData.append("content", data.content)
     formData.append("price", data.price.toString())
-    
+
     body = formData
     headers = {
         Authorization: `Bearer ${token}`,
         // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
     }
-    
+
     console.log("📤 [FormData로 전송] 무조건 FormData 전송")
 
     const response = await fetch(url, {
@@ -466,13 +466,13 @@ export async function createMenu(data: CreateMenuRequest, file?: File): Promise<
     console.log("[v0] POST Create Menu Data:", responseData)
     // API 응답에서 data 필드만 추출하여 반환
     const unwrapped = responseData && typeof responseData === "object" && "data" in responseData ? responseData.data : responseData
-    
+
     // 상대 경로를 전체 URL로 변환
     const menu = unwrapped as MenuItem
     if (menu.thumbnail && !menu.thumbnail.startsWith('http')) {
         menu.thumbnail = `${API_CONFIG.BASE_URL}/${menu.thumbnail}`
     }
-    
+
     return menu
 }
 
@@ -484,23 +484,23 @@ export async function updateMenu(menuId: number, data: UpdateMenuRequest, file?:
 
     // 메뉴 수정은 항상 FormData로 전송 (백엔드 요구사항)
     const formData = new FormData()
-    
+
     // 파일이 있으면 추가 (백엔드가 thumbnailFile 필드명을 사용)
     if (file) {
         formData.append("thumbnailFile", file)
     }
-    
+
     // 데이터 추가
     formData.append("title", data.title)
     formData.append("content", data.content)
     formData.append("price", data.price.toString())
-    
+
     const body = formData
     const headers = {
         Authorization: `Bearer ${token}`,
         // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
     }
-    
+
     console.log("📤 [FormData로 전송] 메뉴 수정")
 
     const response = await fetch(url, {
