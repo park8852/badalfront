@@ -17,6 +17,7 @@ import { getAuthInfo } from "@/lib/auth-utils"
 import useSWR from "swr"
 
 export default function StoreManagementPage() {
+<<<<<<< HEAD
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
@@ -35,6 +36,26 @@ export default function StoreManagementPage() {
     const [logoFile, setLogoFile] = useState<File | null>(null)
     const [logoPreview, setLogoPreview] = useState<string>("")
     const [existingThumbnailUrl, setExistingThumbnailUrl] = useState<string>("")
+=======
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [storeData, setStoreData] = useState<StoreInfo | null>(null)
+  const [formData, setFormData] = useState({
+    category: "",
+    name: "",
+    address: "",
+    phone: "",
+    openH: 9,
+    openM: 0,
+    closedH: 21,
+    closedM: 0,
+    thumbnail: "",
+  })
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string>("")
+  const [existingThumbnailUrl, setExistingThumbnailUrl] = useState<string>("")
+>>>>>>> 0ff1923e228ba6f7eae99b91383c7c0f160f4227
 
     const defaultCategories = [
         "한식",
@@ -93,6 +114,7 @@ export default function StoreManagementPage() {
         }
     }
 
+<<<<<<< HEAD
     const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
@@ -183,6 +205,113 @@ export default function StoreManagementPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
         )
+=======
+    try {
+      setLoading(true)
+      const data = await getStoreInfo(storeId)
+      setStoreData(data)
+      setFormData({
+        category: data.category,
+        name: data.name,
+        address: data.address,
+        phone: data.phone,
+        openH: data.openH,
+        openM: data.openM,
+        closedH: data.closedH,
+        closedM: data.closedM,
+        thumbnail: data.thumbnail || "",
+      })
+      setLogoPreview(data.thumbnail || "")
+      setExistingThumbnailUrl(data.thumbnail || "")
+    } catch (error) {
+      console.error("Failed to load store info:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setLogoFile(file)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemoveLogo = () => {
+    setLogoFile(null)
+    setLogoPreview("")
+    setExistingThumbnailUrl("")
+    setFormData({ ...formData, thumbnail: "" })
+  }
+
+  const handleEdit = () => {
+    setIsEditing(true)
+  }
+
+  const handleCancel = () => {
+    setIsEditing(false)
+    // 폼 데이터를 원래 데이터로 되돌리기
+    if (storeData) {
+      setFormData({
+        category: storeData.category,
+        name: storeData.name,
+        address: storeData.address,
+        phone: storeData.phone,
+        openH: storeData.openH,
+        openM: storeData.openM,
+        closedH: storeData.closedH,
+        closedM: storeData.closedM,
+        thumbnail: storeData.thumbnail || "",
+      })
+      setLogoPreview(storeData.thumbnail || "")
+      setExistingThumbnailUrl(storeData.thumbnail || "")
+    }
+    setLogoFile(null)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    
+    if (!storeId) {
+      alert("가게 ID를 찾을 수 없습니다. 다시 로그인해주세요.")
+      return
+    }
+
+    try {
+      setSaving(true)
+      // logo 필드를 제외하고 API 요청
+      const { thumbnail, ...updateData } = formData
+      
+      // 기존 이미지가 있고 새 이미지를 선택하지 않았으면, 기존 이미지를 다시 전송
+      let fileToSend = logoFile
+      if (!logoFile && existingThumbnailUrl) {
+        try {
+          // 기존 이미지를 File 객체로 변환
+          const response = await fetch(existingThumbnailUrl)
+          const blob = await response.blob()
+          const fileName = existingThumbnailUrl.split('/').pop() || 'image.jpg'
+          fileToSend = new File([blob], fileName, { type: blob.type })
+        } catch (error) {
+          console.error("Failed to convert existing image to file:", error)
+          // 변환 실패 시 그냥 진행
+        }
+      }
+      
+      await updateStoreInfo(storeId, updateData, fileToSend || undefined)
+      alert("가게 정보가 저장되었습니다.")
+      await loadStoreInfo()
+      setIsEditing(false)
+    } catch (error) {
+      console.error("Failed to update store info:", error)
+      alert("저장에 실패했습니다.")
+    } finally {
+      setSaving(false)
+>>>>>>> 0ff1923e228ba6f7eae99b91383c7c0f160f4227
     }
 
     return (

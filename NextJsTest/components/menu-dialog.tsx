@@ -29,6 +29,7 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
         price: 0,
     })
 
+<<<<<<< HEAD
     useEffect(() => {
         if (menu) {
             setFormData({
@@ -48,6 +49,56 @@ export function MenuDialog({ open, onClose, menu, storeId }: MenuDialogProps) {
             setThumbnailPreview("")
             setExistingThumbnailUrl("")
             setThumbnailFile(null)
+=======
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // 파일 크기 체크 (5MB 제한)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("파일 크기는 5MB 이하여야 합니다.")
+        return
+      }
+
+      // 이미지 파일 타입 체크
+      if (!file.type.startsWith("image/")) {
+        alert("이미지 파일만 업로드 가능합니다.")
+        return
+      }
+
+      setThumbnailFile(file)
+
+      // 미리보기 생성
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setThumbnailPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleThumbnailRemove = () => {
+    setThumbnailFile(null)
+    setThumbnailPreview("")
+    setExistingThumbnailUrl("")
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    try {
+      setSaving(true)
+
+      if (menu) {
+        // Update existing menu (파일과 함께 전송)
+        // 기존 이미지가 있고 새 이미지를 선택하지 않았으면, 기존 이미지를 다시 전송
+        let fileToSend = thumbnailFile
+        if (!thumbnailFile && existingThumbnailUrl) {
+          // 기존 이미지를 File 객체로 변환
+          const response = await fetch(existingThumbnailUrl)
+          const blob = await response.blob()
+          const fileName = existingThumbnailUrl.split('/').pop() || 'image.jpg'
+          fileToSend = new File([blob], fileName, { type: blob.type })
+>>>>>>> 0ff1923e228ba6f7eae99b91383c7c0f160f4227
         }
     }, [menu, open])
 

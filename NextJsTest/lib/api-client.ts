@@ -144,12 +144,20 @@ export async function createStore(data: CreateStoreRequest, file?: File): Promis
 
     // 무조건 FormData로 전송
     const formData = new FormData()
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 0ff1923e228ba6f7eae99b91383c7c0f160f4227
     // 파일이 있으면 추가, 없으면 빈 문자열로 null 표현
     if (file) {
         formData.append("thumbnailFile", file)
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 0ff1923e228ba6f7eae99b91383c7c0f160f4227
     // 다른 데이터들 추가
     formData.append("name", data.name)
     formData.append("category", data.category)
@@ -160,7 +168,11 @@ export async function createStore(data: CreateStoreRequest, file?: File): Promis
     formData.append("closedH", data.closedH.toString())
     formData.append("closedM", data.closedM.toString())
     formData.append("createdAt", data.createdAt)
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 0ff1923e228ba6f7eae99b91383c7c0f160f4227
     const body = formData
     const headers = {
         Authorization: `Bearer ${token}`,
@@ -310,14 +322,39 @@ export async function updateStoreInfo(storeId: number, data: UpdateStoreRequest,
     const url = createApiUrl(API_CONFIG.ENDPOINTS.STORE.INFO)
 
     console.log("[v0] Update Store Request:", { url, token: token ? "present" : "missing", data, hasFile: !!file })
+<<<<<<< HEAD
 
     // 무조건 FormData로 전송
     const formData = new FormData()
 
+=======
+
+    // 무조건 FormData로 전송
+    const formData = new FormData()
+    
+>>>>>>> 0ff1923e228ba6f7eae99b91383c7c0f160f4227
     // 파일이 있으면 추가 (없으면 아예 보내지 않음)
     if (file) {
         formData.append("thumbnailFile", file)
     }
+    
+    // 다른 데이터들 추가
+    formData.append("category", data.category)
+    formData.append("name", data.name)
+    formData.append("phone", data.phone)
+    formData.append("address", data.address)
+    formData.append("openH", data.openH.toString())
+    formData.append("openM", data.openM.toString())
+    formData.append("closedH", data.closedH.toString())
+    formData.append("closedM", data.closedM.toString())
+    
+    const body = formData
+    const headers = {
+        Authorization: `Bearer ${token}`,
+        // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
+    }
+    
+    console.log("📤 [FormData로 전송] 무조건 FormData 전송")
 
     // 다른 데이터들 추가
     formData.append("category", data.category)
@@ -422,13 +459,32 @@ export async function createMenu(data: CreateMenuRequest, file?: File): Promise<
     // 무조건 FormData로 전송
     let body: FormData | string
     let headers: Record<string, string>
-
+    
     const formData = new FormData()
 
+<<<<<<< HEAD
+    const formData = new FormData()
+
+=======
+>>>>>>> 0ff1923e228ba6f7eae99b91383c7c0f160f4227
     // 파일이 있으면 추가 (없으면 아예 보내지 않음 - null로 처리됨)
     if (file) {
         formData.append("thumbnailFile", file)
     }
+    
+    // 다른 데이터들 추가
+    formData.append("storeId", data.storeId.toString())
+    formData.append("title", data.title)
+    formData.append("content", data.content)
+    formData.append("price", data.price.toString())
+    
+    body = formData
+    headers = {
+        Authorization: `Bearer ${token}`,
+        // Content-Type은 설정 안함! (브라우저가 자동으로 multipart/form-data 설정)
+    }
+    
+    console.log("📤 [FormData로 전송] 무조건 FormData 전송")
 
     // 다른 데이터들 추가
     formData.append("storeId", data.storeId.toString())
