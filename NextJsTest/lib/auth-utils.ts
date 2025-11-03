@@ -1,3 +1,8 @@
+// 인증 정보 구조체
+// - token: 액세스 토큰(JWT 등)
+// - userId: 사용자 식별자(표시 목적 또는 서버 요청 시 사용)
+// - storeId: 선택적 매장 식별자(사장님/점주 계정일 때 바인딩)
+// - role: 권한(ADMIN/USER 등)
 export interface AuthInfo {
   token: string
   userId: string
@@ -5,6 +10,8 @@ export interface AuthInfo {
   role: string
 }
 
+// 로컬스토리지에 인증 정보를 저장합니다.
+// - 서버 사이드에서는 실행되지 않도록 window 존재 여부를 확인합니다.
 export function setAuthInfo(data: AuthInfo): void {
   if (typeof window !== "undefined") {
     localStorage.setItem("authToken", data.token)
@@ -18,6 +25,8 @@ export function setAuthInfo(data: AuthInfo): void {
   }
 }
 
+// 로컬스토리지에서 인증 정보를 읽어 반환합니다.
+// - 토큰/유저ID가 모두 있을 때만 유효한 객체를 돌려줍니다.
 export function getAuthInfo(): AuthInfo | null {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("authToken")
@@ -37,6 +46,7 @@ export function getAuthInfo(): AuthInfo | null {
   return null
 }
 
+// 로컬스토리지에서 인증 관련 항목을 모두 제거합니다.
 export function clearAuthInfo(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem("authToken")
@@ -46,11 +56,15 @@ export function clearAuthInfo(): void {
   }
 }
 
+// 현재 인증 상태(토큰/유저ID 존재)를 boolean으로 반환합니다.
 export function isAuthenticated(): boolean {
   return getAuthInfo() !== null
 }
 
 // Vite React 프로젝트와의 호환성을 위한 추가 함수들
+// 인증 헤더를 반환합니다.
+// - 토큰이 있으면 Authorization 헤더를 포함합니다.
+// - 기본 Content-Type은 JSON입니다.
 export function getAuthHeaders(): Record<string, string> {
   const authInfo = getAuthInfo()
   if (authInfo?.token) {
@@ -64,6 +78,9 @@ export function getAuthHeaders(): Record<string, string> {
   }
 }
 
+// 인증 실패(401/403) 응답을 처리합니다.
+// - 세션/스토리지를 정리하고 만료 알림을 띄운 뒤 로그인 페이지로 이동합니다.
+// - 호출부에서는 true 반환 시 이후 로직을 중단하고 상위에서 흐름을 제어합니다.
 export function handleAuthError(response: Response): boolean {
   // 401 (Unauthorized) 또는 403 (Forbidden) 에러 처리
   if (response.status === 401 || response.status === 403) {
@@ -123,6 +140,7 @@ export function handleAuthError(response: Response): boolean {
 }
 
 // 로그인 상태 확인 (Vite React와 동일한 인터페이스)
+// Vite React 프로젝트 호환용 별칭
 export function isLoggedIn(): boolean {
   return isAuthenticated()
 }

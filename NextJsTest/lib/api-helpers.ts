@@ -1,13 +1,21 @@
+// 공통 API 호출 유틸리티
+// - 토큰 자동 주입, 공통 에러 처리, JSON 직렬화/역직렬화
+// - 단순 JSON API에는 이 모듈의 apiGet/apiPost/apiPut/apiDelete 사용을 권장합니다.
 import { handleAuthError } from './auth-utils'
 import { API_CONFIG, createApiUrl } from './api-config'
 
 // Get auth token from localStorage
+// 로컬스토리지에서 인증 토큰을 가져옵니다(클라이언트 전용).
 function getAuthToken(): string | null {
   if (typeof window === "undefined") return null
   return localStorage.getItem("authToken")
 }
 
 // 공통 API 호출 함수
+// 공통 fetch 래퍼
+// - endpoint: API_CONFIG.ENDPOINTS.* 의 상대 경로
+// - options: RequestInit (headers/body/method 등)
+// - 반환: 제네릭 T(JSON 파싱 결과)
 async function apiCall<T>(
   endpoint: string, 
   options: RequestInit = {}
@@ -39,11 +47,13 @@ async function apiCall<T>(
 }
 
 // GET 요청 헬퍼
+// GET 요청 헬퍼
 export async function apiGet<T>(endpoint: string): Promise<T> {
   return apiCall<T>(endpoint, { method: 'GET' })
 }
 
 // POST 요청 헬퍼
+// POST 요청 헬퍼(JSON)
 export async function apiPost<T>(endpoint: string, data?: any): Promise<T> {
   return apiCall<T>(endpoint, {
     method: 'POST',
@@ -52,6 +62,7 @@ export async function apiPost<T>(endpoint: string, data?: any): Promise<T> {
 }
 
 // PUT 요청 헬퍼
+// PUT 요청 헬퍼(JSON)
 export async function apiPut<T>(endpoint: string, data?: any): Promise<T> {
   return apiCall<T>(endpoint, {
     method: 'PUT',
@@ -59,6 +70,7 @@ export async function apiPut<T>(endpoint: string, data?: any): Promise<T> {
   })
 }
 
+// DELETE 요청 헬퍼
 // DELETE 요청 헬퍼
 export async function apiDelete<T>(endpoint: string): Promise<T> {
   return apiCall<T>(endpoint, { method: 'DELETE' })

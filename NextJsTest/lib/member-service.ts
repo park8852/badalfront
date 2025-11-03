@@ -1,4 +1,7 @@
-// API 서비스 - 회원 관련 API 호출을 담당
+// 회원 도메인 API 서비스
+// - 회원가입/로그인/로그아웃/내 정보 조회·수정 기능 제공
+// - 인증 필요 요청은 getAuthHeaders()를 통해 토큰을 자동 포함
+// - 401/403 응답은 handleAuthError로 세션 정리 및 안내 후 예외 처리
 import { getAuthHeaders, handleAuthError } from './auth-utils'
 import { API_CONFIG, createApiUrl } from './api-config'
 
@@ -58,7 +61,7 @@ export const memberService = {
     }
   },
 
-  // 로그아웃
+  // 로그아웃 (서버 세션 종료, 로컬 스토리지는 handleAuthError/상위에서 정리)
   async logout() {
     try {
       const response = await fetch(createApiUrl(API_CONFIG.ENDPOINTS.AUTH.LOGOUT), {
@@ -81,7 +84,7 @@ export const memberService = {
     }
   },
 
-  // 회원정보조회
+  // 회원정보조회 (인증 필요)
   async getMyInfo() {
     try {
       const response = await fetch(createApiUrl(API_CONFIG.ENDPOINTS.AUTH.INFO), {
@@ -104,7 +107,7 @@ export const memberService = {
     }
   },
 
-  // 회원정보변경 (POST 방식)
+  // 회원정보변경 (POST 방식, 인증 필요)
   async updateMyInfo(memberData: UpdateMemberRequest) {
     try {
       const response = await fetch(createApiUrl(API_CONFIG.ENDPOINTS.AUTH.INFO), {

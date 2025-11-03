@@ -1,14 +1,24 @@
-// API client for backend communication
+// 도메인별 API 클라이언트 모음
+// - 공통 규칙
+//   1) 인증: localStorage 토큰을 Authorization 헤더로 전달
+//   2) 401/403: handleAuthError로 세션 만료 처리
+//   3) 파일 업로드/폼 전송: FormData 사용(Content-Type 수동 지정 금지)
+//   4) 일부 응답은 { data: ... } 래핑되어 와서 안전하게 언래핑
+//   5) 이미지 경로가 상대경로일 수 있어 BASE_URL을 붙여 절대경로로 보정
+// - 포함 도메인: Store, Menu, Order, Settlement, Board(Q&A/Notice), Upload
+// - 일반 JSON API는 lib/api-helpers.ts 사용 고려, 멀티파트 등 특수 케이스는 여기서 처리
 import { handleAuthError } from "./auth-utils"
 import { API_CONFIG, createApiUrl, API_LOGGING } from "./api-config"
 
-// Get auth token from localStorage or cookie
+// 로컬스토리지(또는 쿠키)에서 인증 토큰을 조회합니다. 서버 사이드에서는 항상 null.
 function getAuthToken(): string | null {
     if (typeof window === "undefined") return null
     return localStorage.getItem("authToken")
 }
 
+// =========================
 // Store API types
+// =========================
 export interface StoreInfo {
     id: number
     memberId: number
@@ -50,7 +60,9 @@ export interface CreateStoreRequest {
     thumbnail?: string  // 백엔드에서 thumbnail 사용
 }
 
+// =========================
 // Menu API types
+// =========================
 export interface MenuItem {
     id: number
     storeId: number
@@ -74,7 +86,9 @@ export interface UpdateMenuRequest {
     price: number
 }
 
+// =========================
 // Order API types
+// =========================
 export interface Order {
     id: number
     memberId: number
@@ -109,7 +123,17 @@ export interface OrderDetail {
     paymentMethod: string
 }
 
-// Store API functions
+// =========================
+// Upload / Store API functions
+// =========================
+/**
+ * 파일 업로드
+ * - 멀티파트(FormData)로 단일 파일을 업로드합니다.
+ * - 서버가 { data: { url } } 형태로 응답할 수 있어 안전 언래핑 후 url만 반환합니다.
+ * @param file 업로드할 파일 객체
+ * @returns 업로드된 파일의 접근 URL { url }
+ * @throws 업로드 실패 시 Error
+ */
 export async function uploadFile(file: File): Promise<{ url: string }> {
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.UPLOAD)
@@ -138,6 +162,15 @@ export async function uploadFile(file: File): Promise<{ url: string }> {
     return unwrapped as { url: string }
 }
 
+/**
+ * 가게 생성
+ * - 항상 FormData로 전송하여 백엔드 스펙을 만족합니다(파일 유무와 무관).
+ * - 파일이 있으면 `thumbnailFile` 필드로 전송합니다.
+ * @param data 가게 생성 필드들(CreateStoreRequest)
+ * @param file 썸네일 이미지(선택)
+ * @returns 생성된 가게 정보(StoreInfo)
+ * @throws 실패 시 Error
+ */
 export async function createStore(data: CreateStoreRequest, file?: File): Promise<StoreInfo> {
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.STORE.CREATE)
@@ -183,6 +216,11 @@ export async function createStore(data: CreateStoreRequest, file?: File): Promis
     return unwrapped as StoreInfo
 }
 // 모든 주문 조회 API (관리자용)
+/**
+ * 전체 주문 목록(관리자용)
+ * - 인증 필요, 실패 시 401/403 처리 후 빈 배열 반환 가능
+ * @returns 주문 배열
+ */
 export async function getAllOrders(): Promise<Order[]> {
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.ORDER.LIST)
@@ -214,6 +252,11 @@ export async function getAllOrders(): Promise<Order[]> {
 }
 
 // 상점 삭제 API (관리자용)
+/**
+ * 가게 삭제(관리자용)
+ * - 일부 백엔드에서 GET 메서드로 삭제를 구현하여 그대로 따릅니다.
+ * @param storeId 삭제할 가게 ID
+ */
 export async function deleteStore(storeId: number): Promise<void> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.STORE.DELETE}/${storeId}`)
@@ -237,6 +280,10 @@ export async function deleteStore(storeId: number): Promise<void> {
 }
 
 // 모든 가게 조회 API (관리자용)
+/**
+ * 전체 가게 목록(관리자용)
+ * @returns 가게 배열
+ */
 export async function getAllStores(): Promise<StoreInfo[]> {
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.STORE.ALL)
@@ -267,6 +314,12 @@ export async function getAllStores(): Promise<StoreInfo[]> {
     return []
 }
 
+/**
+ * 가게 상세 조회
+ * - 응답의 thumbnail이 상대경로일 경우 BASE_URL을 붙여 절대경로로 보정합니다.
+ * @param storeId 가게 ID
+ * @returns 가게 정보
+ */
 export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.STORE.INFO}/${storeId}`)
@@ -305,6 +358,14 @@ export async function getStoreInfo(storeId: number): Promise<StoreInfo> {
     return storeInfo
 }
 
+/**
+ * 가게 정보 수정
+ * - 항상 FormData 전송(파일 유무와 무관). 파일은 `thumbnailFile` 키 사용.
+ * @param storeId 가게 ID(경로 파라미터가 아닌, 서버 스펙상 body로 전달되는 경우가 있어 API 경로는 고정)
+ * @param data 수정 데이터(UpdateStoreRequest)
+ * @param file 썸네일 이미지 파일(선택)
+ * @returns 업데이트 결과(서버 원본 응답 구조)
+ */
 export async function updateStoreInfo(storeId: number, data: UpdateStoreRequest, file?: File): Promise<StoreInfo> {
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.STORE.INFO)
@@ -361,6 +422,13 @@ export async function updateStoreInfo(storeId: number, data: UpdateStoreRequest,
 }
 
 // Menu API functions
+/**
+ * 특정 가게의 메뉴 목록 조회
+ * - 응답이 { data: [...] } 형태일 수 있어 안전 언래핑 후 배열 판단합니다.
+ * - 메뉴 썸네일이 상대경로면 절대경로로 보정합니다.
+ * @param storeId 가게 ID
+ * @returns 메뉴 배열
+ */
 export async function getMenusByStore(storeId: number): Promise<MenuItem[]> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.MENU.STORE}/${storeId}`)
@@ -413,6 +481,14 @@ export async function getMenusByStore(storeId: number): Promise<MenuItem[]> {
     return menus
 }
 
+/**
+ * 메뉴 생성
+ * - FormData로 전송(파일 유무와 무관). 파일은 `thumbnailFile` 키 사용.
+ * - 응답 { data } 언래핑 및 썸네일 경로 보정 수행.
+ * @param data 메뉴 생성 데이터
+ * @param file 썸네일 파일(선택)
+ * @returns 생성된 메뉴
+ */
 export async function createMenu(data: CreateMenuRequest, file?: File): Promise<MenuItem> {
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.MENU.CREATE)
@@ -476,6 +552,13 @@ export async function createMenu(data: CreateMenuRequest, file?: File): Promise<
     return menu
 }
 
+/**
+ * 메뉴 수정
+ * - FormData 전송 고정(백엔드 스펙), 파일 키는 `thumbnailFile`.
+ * @param menuId 수정할 메뉴 ID
+ * @param data 수정 데이터
+ * @param file 썸네일 파일(선택)
+ */
 export async function updateMenu(menuId: number, data: UpdateMenuRequest, file?: File): Promise<void> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.MENU.INFO}/${menuId}`)
@@ -525,6 +608,11 @@ export async function updateMenu(menuId: number, data: UpdateMenuRequest, file?:
     console.log("[v0] PUT Update Menu Data:", responseData)
 }
 
+/**
+ * 메뉴 삭제
+ * - 일부 백엔드에서 GET 메서드 사용.
+ * @param menuId 삭제할 메뉴 ID
+ */
 export async function deleteMenu(menuId: number): Promise<void> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.MENU.DELETE}/${menuId}`)
@@ -554,7 +642,15 @@ export async function deleteMenu(menuId: number): Promise<void> {
     console.log("[v0] DELETE Menu Success")
 }
 
+// =========================
 // Order API functions
+// =========================
+/**
+ * 특정 가게의 주문 목록 조회
+ * - 응답 { data } 언래핑 후 배열 형태를 보장합니다.
+ * @param storeId 가게 ID
+ * @returns 주문 배열
+ */
 export async function getOrdersByStore(storeId: number): Promise<Order[]> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.ORDER.STORE}/${storeId}`)
@@ -596,6 +692,12 @@ export async function getOrdersByStore(storeId: number): Promise<Order[]> {
     return unwrapped as Order[]
 }
 
+/**
+ * 주문 상세 조회
+ * - 응답 { data } 언래핑 후 상세 모델을 반환합니다.
+ * @param orderId 주문 ID
+ * @returns 주문 상세(OrderDetail)
+ */
 export async function getOrderDetail(orderId: number): Promise<OrderDetail> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.ORDER.DETAIL}/${orderId}`)
@@ -652,6 +754,13 @@ export interface OrderPeriodResponse {
     paymentMethod: string
 }
 
+/**
+ * 기간 내 주문 목록 조회
+ * - POST 바디로 기간을 전달(YYYY-MM-DD 형식 권장)
+ * - 실패(401/403) 시 빈 배열을 반환하여 UI 가용성을 높입니다.
+ * @param data { startDay, endDay }
+ * @returns 기간 내 주문 배열
+ */
 export async function getOrdersByPeriod(data: OrderPeriodRequest): Promise<OrderPeriodResponse[]> {
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.ORDER.DAY)
@@ -690,6 +799,9 @@ export async function getOrdersByPeriod(data: OrderPeriodRequest): Promise<Order
     return []
 }
 
+// =========================
+// Settlement API (관리자용)
+// =========================
 // 정산금액 조회 API (관리자용)
 export interface SettlementRequest {
     storeId: number
@@ -710,6 +822,13 @@ export interface SettlementResponse {
     totalAmount: number
 }
 
+/**
+ * 정산 데이터 조회(관리자용)
+ * - POST로 { storeId, month }를 전달합니다.
+ * - 응답 { data } 언래핑 후 SettlementResponse 반환.
+ * @param data { storeId, month(YYYY-MM) }
+ * @returns 정산 결과(가게 정보, 메뉴별 매출 목록, 총액)
+ */
 export async function getSettlementData(data: SettlementRequest): Promise<SettlementResponse> {
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.ORDER.SALES)
@@ -748,6 +867,9 @@ export async function getSettlementData(data: SettlementRequest): Promise<Settle
     throw new Error("Invalid settlement response format")
 }
 
+// =========================
+// Board(Q&A/Notice) API types & functions
+// =========================
 // Q&A API types
 export interface QAItem {
     id: number
@@ -759,6 +881,11 @@ export interface QAItem {
 }
 
 // Q&A 조회 API (관리자용)
+/**
+ * Q&A 목록 조회(관리자용)
+ * - 카테고리 쿼리(`?category=qna`)로 필터링합니다.
+ * @returns Q&A 항목 배열
+ */
 export async function getQAList(): Promise<QAItem[]> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.BOARD.LIST}?category=qna`)
@@ -805,6 +932,13 @@ export interface UpdateQARequest {
     createdAt: string | null
 }
 
+/**
+ * Q&A 수정(관리자용)
+ * - POST JSON으로 업데이트 페이로드를 전달합니다.
+ * @param qaId Q&A ID
+ * @param data 수정 데이터(UpdateQARequest)
+ * @returns 업데이트된 Q&A 항목
+ */
 export async function updateQA(qaId: number, data: UpdateQARequest): Promise<QAItem> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.BOARD.UPDATE}/${qaId}`)
@@ -844,6 +978,11 @@ export async function updateQA(qaId: number, data: UpdateQARequest): Promise<QAI
 }
 
 // Q&A 삭제 API (관리자용)
+/**
+ * Q&A 삭제(관리자용)
+ * - 일부 백엔드에서 GET 메서드로 삭제를 처리합니다.
+ * @param qaId 삭제할 Q&A ID
+ */
 export async function deleteQA(qaId: number): Promise<void> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.BOARD.DELETE}/${qaId}`)
@@ -884,6 +1023,11 @@ export interface NoticeItem {
 }
 
 // 공지사항 조회 API (관리자용)
+/**
+ * 공지사항 목록 조회(관리자용)
+ * - 카테고리 쿼리(`?category=notice`)로 필터링합니다.
+ * @returns 공지사항 배열
+ */
 export async function getNoticeList(): Promise<NoticeItem[]> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.BOARD.LIST}?category=notice`)
@@ -927,6 +1071,12 @@ export interface CreateNoticeRequest {
     content: string
 }
 
+/**
+ * 공지사항 생성(관리자용)
+ * - POST JSON 바디로 생성 데이터 전달.
+ * @param data { category, title, content }
+ * @returns 생성된 공지사항
+ */
 export async function createNotice(data: CreateNoticeRequest): Promise<NoticeItem> {
     const token = getAuthToken()
     const url = createApiUrl(API_CONFIG.ENDPOINTS.BOARD.LIST)
@@ -975,6 +1125,13 @@ export interface UpdateNoticeRequest {
     createdAt: string | null
 }
 
+/**
+ * 공지사항 수정(관리자용)
+ * - POST JSON 바디로 수정 데이터 전달.
+ * @param noticeId 공지 ID
+ * @param data 수정 데이터(UpdateNoticeRequest)
+ * @returns 업데이트된 공지사항
+ */
 export async function updateNotice(noticeId: number, data: UpdateNoticeRequest): Promise<NoticeItem> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.BOARD.UPDATE}/${noticeId}`)
@@ -1014,6 +1171,11 @@ export async function updateNotice(noticeId: number, data: UpdateNoticeRequest):
 }
 
 // 공지사항 삭제 API (관리자용)
+/**
+ * 공지사항 삭제(관리자용)
+ * - 일부 백엔드에서 GET 메서드로 삭제를 처리합니다.
+ * @param noticeId 삭제할 공지 ID
+ */
 export async function deleteNotice(noticeId: number): Promise<void> {
     const token = getAuthToken()
     const url = createApiUrl(`${API_CONFIG.ENDPOINTS.BOARD.DELETE}/${noticeId}`)
